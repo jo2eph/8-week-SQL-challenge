@@ -13,6 +13,14 @@ Link: [Case Study 1 - Danny's Diner](https://8weeksqlchallenge.com/case-study-1/
 - [Case Study Questions](#case-study-questions)
 - [Question 1](#1-what-is-the-total-amount-each-customer-spent-at-the-restaurant)
 - [Question 2](#2-how-many-days-has-each-customer-visited-the-restaurant)
+- [Question 3](#3-what-was-the-first-item-from-the-menu-purchased-by-each-customer)
+- [Question 4](#4-what-is-the-most-purchased-item-on-the-menu-and-how-many-times-was-it-purchased-by-all-customers)
+- [Question 5](#5-which-item-was-the-most-popular-for-each-customer)
+- [Question 6](#6-which-item-was-purchased-first-by-the-customer-after-they-became-a-member)
+- [Question 7](#7-which-item-was-purchased-just-before-the-customer-became-a-member)
+- [Question 8](#8-what-is-the-total-items-and-amount-spent-for-each-member-before-they-became-a-member)
+- [Question 9](#9-if-each-1-spent-equates-to-10-points-and-sushi-has-a-2x-points-multiplier---how-many-points-would-each-customer-have)
+- [Question 10](#10-in-the-first-week-after-a-customer-joins-the-program-including-their-join-date-they-earn-2x-points-on-all-items-not-just-sushi---how-many-points-do-customer-a-and-b-have)
 
 ---
 
@@ -227,16 +235,173 @@ ORDER BY customer_id ASC;
 
 ### 3. What was the first item from the menu purchased by each customer?
 
+In this problem, we are interested in identifying the first item purchased by each customer.
+
+Let's look at `sales` once more.
+(Note: I've used `LIMIT` to display only the first five items, just so that we keep the displayed output shorter, and for simplicity.)
+
+```sql
+SELECT *
+FROM dannys_diner.sales
+LIMIT 5;
+```
+
+| customer_id | order_date | product_id |
+| ----------- | ---------- | ---------- |
+| A           | 2021-01-01 | 1          |
+| A           | 2021-01-01 | 2          |
+| A           | 2021-01-07 | 2          |
+| A           | 2021-01-10 | 3          |
+| A           | 2021-01-11 | 3          |
+
+The approach we will take for this problem is creating a **CTE** (Common Table Expression), using `WITH`.
+We will create a CTE called `sales_cte`.
+Additionally, we will use `INNER JOIN` so that we combine the product name with the product ID.
+
+```sql
+WITH sales_cte AS (
+    SELECT
+        customer_id,
+        order_date,
+        product_name
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+    ORDER BY customer_id, order_date ASC
+)
+```
+
+This CTE gives us a table that looks like this (only the first five rows are shown):
+
+| customer_id | order_date | product_name |
+| ----------- | ---------- | ------------ |
+| A           | 2021-01-01 | curry        |
+| A           | 2021-01-01 | sushi        |
+| A           | 2021-01-07 | curry        |
+| A           | 2021-01-10 | ramen        |
+| A           | 2021-01-11 | ramen        |
+
+There are several approaches we can do from here on out.
+One approach we can use is to give the sales for each customer a rank based on order.
+
+This is where `DENSE_RANK()` comes in.
+One reason we use `DENSE_RANK()` over `RANK()` in this case is because `DENSE_RANK()` allows ties and does *not* skip,
+where as `RANK()` *does* skip in the sequence.
+
+For example, with `DENSE_RANK()`, you can have something like `1, 1, 2, 3, 4, 4, 5`.
+
+However, with `RANK()`, you will end up with `1, 1, 3, 4, 4, 6` instead.
+
+Aside: I believe that this should still work even if we use `RANK()` since this question asks for the first item.
+However, I'm doing this for best practice, in case this question asked for the second or third item instead.
+
+Using `DENSE_RANK()`, we will partition it by `sales.customer_id`, using `PARTITION`.
+That way, the sales of each customers get grouped accordingly.
+
+Then, we use `ORDER BY` using `sales.order_date`, so that we rank the order date for each of the customers.
+We use `ASC`, since we want the earliest order date to come first.
+
+Thus, our SQL query looks like this:
+
+```sql
+WITH sales_cte AS (
+  SELECT
+    sales.customer_id,
+    sales.order_date,
+    menu.product_name,
+    DENSE_RANK() OVER (
+        PARTITION BY sales.customer_id
+        ORDER BY sales.order_date ASC
+    ) AS rank
+  FROM dannys_diner.sales
+  INNER JOIN dannys_diner.menu
+    ON menu.product_id = sales.product_id
+)
+/* ... */
+```
+
+This CTE gives us a table that looks like this:
+
+| customer_id | order_date | product_name | rank |
+| ----------- | ---------- | ------------ | ---- |
+| A           | 2021-01-01 | curry        | 1    |
+| A           | 2021-01-01 | sushi        | 1    |
+| A           | 2021-01-07 | curry        | 2    |
+| A           | 2021-01-10 | ramen        | 3    |
+| A           | 2021-01-11 | ramen        | 4    |
+| A           | 2021-01-11 | ramen        | 4    |
+| B           | 2021-01-01 | curry        | 1    |
+| B           | 2021-01-02 | curry        | 2    |
+| B           | 2021-01-04 | sushi        | 3    |
+| B           | 2021-01-11 | sushi        | 4    |
+| B           | 2021-01-16 | ramen        | 5    |
+| B           | 2021-02-01 | ramen        | 6    |
+| C           | 2021-01-01 | ramen        | 1    |
+| C           | 2021-01-01 | ramen        | 1    |
+| C           | 2021-01-07 | ramen        | 2    |
+
+Finally, we want to extract the first item ordered by each customer.
+We finish off our SQL query with a `WHERE` clause.
+
+Thus, our final SQL query for Question 3 is as follows:
+
+```sql
+WITH sales_cte AS (
+    SELECT
+        sales.customer_id,
+        sales.order_date,
+        menu.product_name,
+        RANK() OVER (
+            PARTITION BY sales.customer_id
+            ORDER BY sales.order_date
+        ) AS rank
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+)
+SELECT *
+FROM sales_cte
+WHERE rank = 1;
+```
+
+| customer_id | order_date | product_name | rank |
+| ----------- | ---------- | ------------ | ---- |
+| A           | 2021-01-01 | curry        | 1    |
+| A           | 2021-01-01 | sushi        | 1    |
+| B           | 2021-01-01 | curry        | 1    |
+| C           | 2021-01-01 | ramen        | 1    |
+| C           | 2021-01-01 | ramen        | 1    |
+
+**ANSWER:**
+
+- Customer A's first items purchased is curry and sushi.
+- Customer B's first item purchased is curry.
+- Customer C's first item purchased is ramen.
+
 ### 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
+
+
 
 ### 5. Which item was the most popular for each customer?
 
+
+
 ### 6. Which item was purchased first by the customer after they became a member?
+
+
 
 ### 7. Which item was purchased just before the customer became a member?
 
+
+
 ### 8. What is the total items and amount spent for each member before they became a member?
+
+
 
 ### 9. If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
 
+
+
 ### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have
+
+
