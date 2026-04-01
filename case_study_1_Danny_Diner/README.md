@@ -236,14 +236,12 @@ ORDER BY customer_id ASC;
 ### 3. What was the first item from the menu purchased by each customer?
 
 In this problem, we are interested in identifying the first item purchased by each customer.
-
 Let's look at `sales` once more.
-(Note: I've used `LIMIT` to display only the first five items, just so that we keep the displayed output shorter, and for simplicity.)
+(First five rows shown)
 
 ```sql
 SELECT *
-FROM dannys_diner.sales
-LIMIT 5;
+FROM dannys_diner.sales;
 ```
 
 | customer_id | order_date | product_id |
@@ -269,6 +267,7 @@ WITH sales_cte AS (
         ON menu.product_id = sales.product_id
     ORDER BY customer_id, order_date ASC
 )
+/* ... */
 ```
 
 This CTE gives us a table that looks like this (only the first five rows are shown):
@@ -288,12 +287,12 @@ This is where `DENSE_RANK()` comes in.
 One reason we use `DENSE_RANK()` over `RANK()` in this case is because `DENSE_RANK()` allows ties and does *not* skip,
 where as `RANK()` *does* skip in the sequence.
 
-For example, with `DENSE_RANK()`, you can have something like `1, 1, 2, 3, 4, 4, 5`.
+For example, with `DENSE_RANK()`, you can have something like `1, 1, 2, 3, 4, 5`.
 
-However, with `RANK()`, you will end up with `1, 1, 3, 4, 4, 6` instead.
+However, with `RANK()`, you will end up with `1, 1, 3, 4, 5, 6` instead.
 
 Aside: I believe that this should still work even if we use `RANK()` since this question asks for the first item.
-However, I'm doing this for best practice, in case this question asked for the second or third item instead.
+However, I'm doing this since I think it's best practice, in case this or future questions asked for the second or third item instead.
 
 Using `DENSE_RANK()`, we will partition it by `sales.customer_id`, using `PARTITION`.
 That way, the sales of each customers get grouped accordingly.
@@ -351,7 +350,7 @@ WITH sales_cte AS (
         sales.customer_id,
         sales.order_date,
         menu.product_name,
-        RANK() OVER (
+        DENSE_RANK() OVER (
             PARTITION BY sales.customer_id
             ORDER BY sales.order_date
         ) AS rank
@@ -359,18 +358,20 @@ WITH sales_cte AS (
     INNER JOIN dannys_diner.menu
         ON menu.product_id = sales.product_id
 )
-SELECT *
+SELECT
+    customer_id,
+    product_name
 FROM sales_cte
 WHERE rank = 1;
 ```
 
-| customer_id | order_date | product_name | rank |
-| ----------- | ---------- | ------------ | ---- |
-| A           | 2021-01-01 | curry        | 1    |
-| A           | 2021-01-01 | sushi        | 1    |
-| B           | 2021-01-01 | curry        | 1    |
-| C           | 2021-01-01 | ramen        | 1    |
-| C           | 2021-01-01 | ramen        | 1    |
+| customer_id | product_name |
+| ----------- | ------------ |
+| A           | curry        |
+| A           | sushi        |
+| B           | curry        |
+| C           | ramen        |
+| C           | ramen        |
 
 **ANSWER:**
 
