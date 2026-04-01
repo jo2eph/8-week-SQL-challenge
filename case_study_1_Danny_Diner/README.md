@@ -53,8 +53,6 @@ SELECT *
 FROM dannys_diner.sales;
 ```
 
-If we run this, we get the following table:
-
 | customer_id | order_date | product_id |
 | ----------- | ---------- | ---------- |
 | A           | 2021-01-01 | 1          |
@@ -105,7 +103,7 @@ INNER JOIN dannys_diner.menu
     ON sales.product_id = menu.product_id;
 ```
 
-The output table is omitted for simplicity.
+*The output table is omitted for simplicity.*
 
 Then, we want to compute the total price for each of the customers.
 To do this, we use the `SUM` function on the `price` column.
@@ -131,6 +129,8 @@ GROUP BY customer_id;
 And just for personal preference, let's sort the data by `customer_id` to ensure that it is in alphabetical order, using `ORDER BY`.
 Not strictly necessary, but it looks nicer this way.
 
+Thus, our final query for Question 1 is as follows:
+
 ```sql
 SELECT 
     customer_id,
@@ -148,7 +148,7 @@ ORDER BY customer_id ASC;
 | B           | 74          |
 | C           | 36          |
 
-**Answer:**
+**ANSWER:**
 
 - Customer A spent a total of $76.
 - Customer B spent a total of $74.
@@ -157,6 +157,25 @@ ORDER BY customer_id ASC;
 ---
 
 ### 2. How many days has each customer visited the restaurant?
+
+In this question, we are interested in how many days.
+For this, we are going to examine the `sales` table, where we can see the column of interest: `order_date`.
+
+From the first few rows, we can already see that we have duplicates of dates.
+This is due to the fact that some customers have ordered more than one item on the same date.
+
+For example, if we look at the first two rows, we see that Customer A have ordered Product 1 (sushi) and Product 2 (curry) on January 1, 2021.
+
+Since we are interested in how many days each customer visited the restaurant, we want to remove duplicate dates.
+
+For this, we are going to use `DISTINCT`.
+Then, we need to group them by `customer_id`.
+
+Finally, we have to update our query so that we get not the date but the total count of unique dates, which we will save as the column `total_visits`.
+
+```sql
+
+```
 
 ### 3. What was the first item from the menu purchased by each customer?
 
@@ -172,4 +191,4 @@ ORDER BY customer_id ASC;
 
 ### 9. If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
 
-### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have
