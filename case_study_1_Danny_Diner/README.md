@@ -11,6 +11,8 @@ Link: [Case Study 1 - Danny's Diner](https://8weeksqlchallenge.com/case-study-1/
 - [Introduction](#introduction)
 - [Entity Relationship Diagram](#entity-relationship-diagram)
 - [Case Study Questions](#case-study-questions)
+- [Question 1](#1-what-is-the-total-amount-each-customer-spent-at-the-restaurant)
+- [Question 2](#2-how-many-days-has-each-customer-visited-the-restaurant)
 
 ---
 
@@ -166,16 +168,37 @@ This is due to the fact that some customers have ordered more than one item on t
 
 For example, if we look at the first two rows, we see that Customer A have ordered Product 1 (sushi) and Product 2 (curry) on January 1, 2021.
 
-Since we are interested in how many days each customer visited the restaurant, we want to remove duplicate dates.
+Since we are interested in how many days each customer visited the restaurant rather than the total number of visits, we want to remove duplicate dates.
 
-For this, we are going to use `DISTINCT`.
+For this, we are going to use `DISTINCT` to ensure we remove the duplicate dates.
+
+Next, we use `COUNT` so that we get the total count of unique visit dates, which we will save as the column `total_visits`.
+
 Then, we need to group them by `customer_id`.
+Finally, just like the previous quesiton, we use `ORDER BY` for alphabetical order.
 
-Finally, we have to update our query so that we get not the date but the total count of unique dates, which we will save as the column `total_visits`.
+Thus, our final SQL query is as follows:
 
 ```sql
-
+SELECT
+    customer_id,
+    COUNT(DISTINCT order_date) AS total_vists
+FROM dannys_diner.sales
+GROUP BY customer_id
+ORDER BY customer_id ASC;
 ```
+
+| customer_id | total_vists |
+| ----------- | ----------- |
+| A           | 4           |
+| B           | 6           |
+| C           | 2           |
+
+**ANSWER:**
+
+- Customer A visited a total of 4 days.
+- Customer B visited a total of 6 dys.
+- Customer C visited a total of 2 days.
 
 ### 3. What was the first item from the menu purchased by each customer?
 
