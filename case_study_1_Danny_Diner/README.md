@@ -161,7 +161,32 @@ ORDER BY customer_id ASC;
 ### 2. How many days has each customer visited the restaurant?
 
 In this question, we are interested in how many days.
-For this, we are going to examine the `sales` table, where we can see the column of interest: `order_date`.
+For this, we are going to examine the `sales` table. In particular, we are going to focus only on the columns `customer_id` and `order_date`.
+
+```sql
+SELECT
+    customer_id,
+    order_date
+FROM dannys_diner.sales;
+```
+
+| customer_id | order_date |
+| ----------- | ---------- |
+| A           | 2021-01-01 |
+| A           | 2021-01-01 |
+| A           | 2021-01-07 |
+| A           | 2021-01-10 |
+| A           | 2021-01-11 |
+| A           | 2021-01-11 |
+| B           | 2021-01-01 |
+| B           | 2021-01-02 |
+| B           | 2021-01-04 |
+| B           | 2021-01-11 |
+| B           | 2021-01-16 |
+| B           | 2021-02-01 |
+| C           | 2021-01-01 |
+| C           | 2021-01-01 |
+| C           | 2021-01-07 |
 
 From the first few rows, we can already see that we have duplicates of dates.
 This is due to the fact that some customers have ordered more than one item on the same date.
