@@ -385,6 +385,30 @@ WHERE rank = 1;
 
 ### 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
 
+First, let's find out what the most purchased item on the menu is.
+We can do that with the following SQL query:
+
+```sql
+SELECT 
+    menu.product_name,
+    COUNT(product_name) AS total_purchased
+FROM dannys_diner.sales
+INNER JOIN dannys_diner.menu
+    ON sales.product_id = menu.product_id
+GROUP BY product_name
+ORDER BY total_purchased DESC;
+```
+
+| product_name | total_purchased |
+| ------------ | --------------- |
+| ramen        | 8               |
+| curry        | 4               |
+| sushi        | 3               |
+
+**ANSWER:**
+Ramen is the most purchased item from this restaurant.
+It was purchased a total of 8 times by all customers.
+
 ---
 
 ### 5. Which item was the most popular for each customer?
