@@ -675,6 +675,179 @@ Assuming that in the case of `order_date` and `join_date` being equal, and custo
 
 ### 7. Which item was purchased just before the customer became a member?
 
+Here, we want to know what item each customer purchased just before becoming a member. 
+
+Let's start by creating our CTE and selecting the data we need for this problem.
+In particular, we are going to do `INNER JOIN` on all three tables, since we need `menu.product_name` and `members.join_date`.
+Afterwards, we are going to select `sales.customer_id`, `members.join_date`, `sales.order_date`, and `menu.product_name`.
+
+So, our resulting CTE looks like this:
+
+```sql
+WITH cte AS (
+    SELECT
+        sales.customer_id,
+        members.join_date,
+        sales.order_date,
+        menu.product_name
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+    INNER JOIN dannys_diner.members
+        ON members.customer_id = sales.customer_id
+)
+/* ... */
+```
+
+| customer_id | join_date  | order_date | product_name |
+| ----------- | ---------- | ---------- | ------------ |
+| A           | 2021-01-07 | 2021-01-07 | curry        |
+| A           | 2021-01-07 | 2021-01-11 | ramen        |
+| A           | 2021-01-07 | 2021-01-11 | ramen        |
+| A           | 2021-01-07 | 2021-01-10 | ramen        |
+| A           | 2021-01-07 | 2021-01-01 | sushi        |
+| A           | 2021-01-07 | 2021-01-01 | curry        |
+| B           | 2021-01-09 | 2021-01-04 | sushi        |
+| B           | 2021-01-09 | 2021-01-11 | sushi        |
+| B           | 2021-01-09 | 2021-01-01 | curry        |
+| B           | 2021-01-09 | 2021-01-02 | curry        |
+| B           | 2021-01-09 | 2021-01-16 | ramen        |
+| B           | 2021-01-09 | 2021-02-01 | ramen        |
+
+But we're not done with the CTE just yet.
+
+We need to get only the rows where each customer purchased an item before they became a member.
+For this, we need to use the window function `DENSE_RANK()`.
+
+But once again, similar to the previous question, we run into this problem where it is impossible to determine in the case where `join_date` is equal to `order_date` (i.e. purchased on the same day they became a member) if they purchased the item before they became a member or vice versa. Without any further information, like the actual time of purchase and the time of becoming a member, it is impossible to know for certain, so the best we can do is assume.
+
+**Assumption 1:** Customer ordered first before becoming member.
+
+In this case, we are going to filter the rows in our CTE `WHERE sales.order_date <= members.join_date`.
+
+```sql
+WITH cte AS (
+    SELECT
+        sales.customer_id,
+        members.join_date,
+        sales.order_date,
+        menu.product_name,
+        DENSE_RANK() OVER (
+            PARTITION BY sales.customer_id
+            ORDER BY sales.order_date DESC
+        ) AS rank
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+    INNER JOIN dannys_diner.members
+        ON members.customer_id = sales.customer_id
+    WHERE sales.order_date <= members.join_date
+)
+/* ... */
+```
+
+Our CTE looks like this:
+
+| customer_id | join_date  | order_date | product_name | rank |
+| ----------- | ---------- | ---------- | ------------ | ---- |
+| A           | 2021-01-07 | 2021-01-07 | curry        | 1    |
+| A           | 2021-01-07 | 2021-01-01 | sushi        | 2    |
+| A           | 2021-01-07 | 2021-01-01 | curry        | 2    |
+| B           | 2021-01-09 | 2021-01-04 | sushi        | 1    |
+| B           | 2021-01-09 | 2021-01-02 | curry        | 2    |
+| B           | 2021-01-09 | 2021-01-01 | curry        | 3    |
+
+Notice that the latest dates are ranked first for each customers.
+Thus, our next step is to select the columns we need for this problem: `customer_id`, `product_name`.
+Finally, for our last step, we need to filter the rows where `rank = 1`.
+
+Thus, our final SQL query is as follows:
+
+**Assumption 1:** Customer ordered first *before* becoming member.
+
+In this case, we are going to filter the rows in our CTE `WHERE sales.order_date <= members.join_date`.
+
+```sql
+WITH cte AS (
+    SELECT
+        sales.customer_id,
+        members.join_date,
+        sales.order_date,
+        menu.product_name,
+        DENSE_RANK() OVER (
+            PARTITION BY sales.customer_id
+            ORDER BY sales.order_date DESC
+        ) AS rank
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+    INNER JOIN dannys_diner.members
+        ON members.customer_id = sales.customer_id
+    WHERE sales.order_date <= members.join_date
+)
+SELECT
+    customer_id,
+    product_name
+FROM cte
+WHERE rank = 1;
+```
+
+| customer_id | product_name |
+| ----------- | ------------ |
+| A           | curry        |
+| B           | sushi        |
+
+**ANSWER 1:**
+
+Under Assumption 1:
+
+- Customer A's last purchased item before becoming a member is curry.
+- Customer B's last purchased item before becomign a member is sushi.
+
+**Assumption 2:** Customer ordered *after* becoming member.
+
+In this case, we are going to filter the rows in our CTE `WHERE sales.order_date < members.join_date`.
+
+Then, the remaining steps are similar to that of Assumtion 1, and we are done.
+
+```sql
+WITH cte AS (
+    SELECT
+        sales.customer_id,
+        members.join_date,
+        sales.order_date,
+        menu.product_name,
+        DENSE_RANK() OVER (
+            PARTITION BY sales.customer_id
+            ORDER BY sales.order_date DESC
+        ) AS rank
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+    INNER JOIN dannys_diner.members
+        ON members.customer_id = sales.customer_id
+    WHERE sales.order_date < members.join_date
+)
+SELECT
+    customer_id,
+    product_name
+FROM cte
+WHERE rank = 1;
+```
+
+| customer_id | product_name |
+| ----------- | ------------ |
+| A           | sushi        |
+| A           | curry        |
+| B           | sushi        |
+
+**ANSWER 2:**
+
+Under Assumption 2:
+
+- Customer A's last purchased items before becoming a member are sushi and curry.
+- Customer B's last purchased item before becoming a member is sushi.
+
 ---
 
 ### 8. What is the total items and amount spent for each member before they became a member?
