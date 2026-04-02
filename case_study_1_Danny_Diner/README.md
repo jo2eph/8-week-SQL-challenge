@@ -385,8 +385,16 @@ WHERE rank = 1;
 
 ### 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
 
-First, let's find out what the most purchased item on the menu is.
-We can do that with the following SQL query:
+We want to find out what the most popular item on the menu is among all customers.
+For this, we are going to look at the `sales` table.
+
+Since we want to not only know what is the most purchased item, but also how many times it was purchased, we are going to use `COUNT` on `product_name`, and we will save that as `total_purchased`.
+
+Since we also want to know what the name of the most purchased item on the menu is, we are going to perform `INNER JOIN` on `menu.product_id`.
+
+Lastly, we are going to `GROUP BY` the `product_name`, and we are going to order the table in descending order by `total_purchased`, ensuring that the most purchased item is at the top.
+
+Thus, our final SQL query is as follows:
 
 ```sql
 SELECT 
@@ -406,12 +414,129 @@ ORDER BY total_purchased DESC;
 | sushi        | 3               |
 
 **ANSWER:**
+
 Ramen is the most purchased item from this restaurant.
 It was purchased a total of 8 times by all customers.
 
 ---
 
 ### 5. Which item was the most popular for each customer?
+
+In this problem, we want to find which item was the most popular for each customer.
+
+Let's start by looking at the `sales` table.
+
+```sql
+SELECT *
+FROM dannys_diner.sales;
+```
+
+Since we want the name of the product, we are going to perform a `INNER JOIN` on `product_id`.
+
+```sql
+SELECT
+    sales.customer_id
+FROM dannys_diner.sales
+INNER JOIN dannys_diner.menu
+    ON menu.product_id = sales.product_id;
+```
+
+Since we want to know which item was the most popular, i.e., what item(s) did each customer buy the most of, we are going to use `COUNT`, and save that as the column `total_purchased`.
+
+We are also going to use the `GROUP BY` to group `customer_id` and `product_name`.
+
+```sql
+SELECT
+    sales.customer_id,
+    menu.product_name,
+    COUNT(sales) AS total_purchased
+FROM dannys_diner.sales
+INNER JOIN dannys_diner.menu
+    ON menu.product_id = sales.product_id
+GROUP BY customer_id, product_name;
+```
+
+| customer_id | product_name | total_purchased |
+| ----------- | ------------ | --------------- |
+| B           | sushi        | 2               |
+| A           | curry        | 2               |
+| B           | curry        | 2               |
+| C           | ramen        | 3               |
+| A           | sushi        | 1               |
+| A           | ramen        | 3               |
+| B           | ramen        | 2               |
+
+Now, we want to rank the `total_purchased` column from highest to lowest.
+For this, we are going to use `DENSE_RANK()`, partitioning the data by `customer_id` and ranking the total count of the purchases of each item.
+Note that we want `DESC` so that the most purchased are ranked first.
+
+```sql
+SELECT
+    sales.customer_id,
+    menu.product_name,
+    COUNT(sales) AS total_purchased,
+    DENSE_RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY COUNT(sales.product_id) DESC
+    ) AS rank
+FROM dannys_diner.sales
+INNER JOIN dannys_diner.menu
+    ON menu.product_id = sales.product_id
+GROUP BY customer_id, product_name;
+```
+
+| customer_id | product_name | total_purchased | rank |
+| ----------- | ------------ | --------------- | ---- |
+| A           | ramen        | 3               | 1    |
+| A           | curry        | 2               | 2    |
+| A           | sushi        | 1               | 3    |
+| B           | ramen        | 2               | 1    |
+| B           | curry        | 2               | 1    |
+| B           | sushi        | 2               | 1    |
+| C           | ramen        | 3               | 1    |
+
+We're almost done.
+We are going to convert this into a CTE.
+Finally, we are going to filter only the rows where `rank = 1`, i.e., most purchased items for each customer.
+
+Thus, our final SQL query for this problem looks like this:
+
+```sql
+WITH cte AS (
+    SELECT
+        sales.customer_id,
+        menu.product_name,
+        COUNT(sales.product_id) AS total_purchased,
+        DENSE_RANK() OVER (
+            PARTITION BY customer_id
+            ORDER BY COUNT(sales.product_id) DESC
+        ) AS rank
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+    GROUP BY customer_id, product_name
+)
+SELECT
+    customer_id,
+    product_name,
+    total_purchased
+FROM cte
+WHERE rank = 1;
+```
+
+| customer_id | product_name | total_purchased |
+| ----------- | ------------ | --------------- |
+| A           | ramen        | 3               |
+| B           | ramen        | 2               |
+| B           | curry        | 2               |
+| B           | sushi        | 2               |
+| C           | ramen        | 3               |
+
+**ANSWER:**
+
+- The most popular item for Customer A is ramen.
+- The most popular items for Customer B is a tie between ramen, curry, and sushi.
+- The most popular item for Customer C is ramen.
 
 ---
 
