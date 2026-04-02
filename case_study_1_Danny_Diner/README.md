@@ -542,6 +542,135 @@ WHERE rank = 1;
 
 ### 6. Which item was purchased first by the customer after they became a member?
 
+Here, we want to know what item was purchased first by the customer after they became a member. The table `dannys_diner.members` have the data we need to know when a customer became a member. Furthermore, we also need to know the name of the product they purchased after becoming a member, thus we also need `dannys_diner.menu`.
+
+First thing we are going to do is perform an inner join on *all* three tables.
+Then, we are going to select `sales.customer_id`, `sales.order_date`, `members.join_date`, `sales.product_id`, and `menu.product_name`.
+
+Furthermore, we are going to use the window function `DENSE_RANK()` over `sales.customer_id`, ordering by `sales.order_date` in ascending order. We will save the dense rank as `rank`.
+
+Finally, let's save this as a CTE.
+
+```sql
+WITH cte AS (
+    SELECT
+        sales.customer_id,
+        sales.order_date,
+        members.join_date,
+        sales.product_id,
+        menu.product_name,
+        DENSE_RANK() OVER (
+            PARTITION BY sales.customer_id
+            ORDER BY sales.order_date ASC
+        ) AS rank
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.members
+        ON sales.customer_id = members.customer_id
+    INNER JOIN dannys_diner.menu
+        ON sales.product_id = menu.product_id
+)
+/* ... */
+```
+
+Now, we need to filter only the items purchased after a customer became a member.
+
+However, this is where I personally had a problem.
+If we look at the table, the only information we have about when they ordered and when they joined is the dates, `order_date` and `join_date`.
+
+Without any further information like the actual time of ordering an item or time of becoming a member, for the case of `order_date` being the same value as `join_date`, it is impossible to determine whether the customer joined *first* then ordered afterwards, or they ordered *first* then became a member.
+
+Because of this problem, we are going to assume both ways.
+
+In this case, we are going to filter where `sales.order_date >= members.join_date`.
+
+Finally, we are going to select the relevant information we need to answer this question: `customer_id`, `order_date`, `join_date`, `product_name`.
+
+```sql
+WITH cte AS (
+    SELECT
+        sales.customer_id,
+        sales.order_date,
+        members.join_date,
+        sales.product_id,
+        menu.product_name,
+        DENSE_RANK() OVER (
+            PARTITION BY sales.customer_id
+            ORDER BY sales.order_date ASC
+        ) AS rank
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.members
+        ON sales.customer_id = members.customer_id
+    INNER JOIN dannys_diner.menu
+        ON sales.product_id = menu.product_id
+    WHERE sales.order_date >= members.join_date
+    ORDER BY sales.customer_id, sales.order_date
+)
+SELECT
+    customer_id,
+    order_date,
+    join_date,
+    product_name
+FROM cte
+WHERE rank = 1;
+```
+
+| customer_id | order_date | join_date  | product_name |
+| ----------- | ---------- | ---------- | ------------ |
+| A           | 2021-01-07 | 2021-01-07 | curry        |
+| B           | 2021-01-11 | 2021-01-09 | sushi        |
+
+**ANSWER 1:**
+
+Under the assumption that when the `order_date` and `join_date` are equal *and* the customers joined first before ordering on the same day:
+
+- Customer A's first purchased item after becoming a member is curry.
+- Customer B's first purchased item after becoming a member is sushi.
+
+On the other hand, if in the case that `order_date` and `join_date` are equal, *and* the customers ordered first before becoming a member, the only change we need to make is change the conditional to `sales.order_date > members.join_date`.
+
+Thus, we get the following SQL query:
+
+```sql
+WITH cte AS (
+    SELECT
+        sales.customer_id,
+        sales.order_date,
+        members.join_date,
+        sales.product_id,
+        menu.product_name,
+        DENSE_RANK() OVER (
+            PARTITION BY sales.customer_id
+            ORDER BY sales.order_date ASC
+        ) AS rank
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.members
+        ON sales.customer_id = members.customer_id
+    INNER JOIN dannys_diner.menu
+        ON sales.product_id = menu.product_id
+    WHERE sales.order_date > members.join_date
+    ORDER BY sales.customer_id, sales.order_date
+)
+SELECT
+    customer_id,
+    order_date,
+    join_date,
+    product_name
+FROM cte
+WHERE rank = 1;
+```
+
+| customer_id | order_date | join_date  | product_name |
+| ----------- | ---------- | ---------- | ------------ |
+| A           | 2021-01-10 | 2021-01-07 | ramen        |
+| B           | 2021-01-11 | 2021-01-09 | sushi        |
+
+**ANSWER 2:**
+
+Assuming that in the case of `order_date` and `join_date` being equal, and customers ordered first then became a member:
+
+- Customer A's first purchased item after becoming a member is ramen.
+- Customer B's first purchased item after becoming a member is sushi.
+
 ---
 
 ### 7. Which item was purchased just before the customer became a member?
