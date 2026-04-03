@@ -1,8 +1,8 @@
-# Case Study 2 - Danny's Diner
+# Case Study 2 - Pizza Runner
 
-![image](https://8weeksqlchallenge.com/images/case-study-designs/1.png)
+![image](https://8weeksqlchallenge.com/images/case-study-designs/2.png)
 
-Link: [Case Study 1 - Danny's Diner](https://8weeksqlchallenge.com/case-study-1/)
+Link: [Case Study 2 - Pizza Runner](https://8weeksqlchallenge.com/case-study-2/)
 
 ---
 
