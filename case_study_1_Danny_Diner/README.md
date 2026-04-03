@@ -1261,3 +1261,274 @@ GROUP BY cte2.customer_id;
 
 - Customer A has a total of 1370 points.
 - Customer B has a total of 820 points.
+
+---
+
+## Bonus Questions
+
+### Join All The Things
+
+The following questions are related to creating basic data tables that Danny and his team can use to quickly derive insights without needing to join the underlying tables using SQL.
+
+Recreate the following table output using the available data:
+
+![Image](./image/table1.png)
+
+We are tasked with recreating this table in the screenshot above.
+This table we are trying to recreate has the following columns:
+`customer_id`, `order_date`, `product_name`, `price`, and `member`.
+
+The first thing we are going to do is use `JOIN` to combine all three tables.
+We are going to use two different joins. For `dannys_diner.sales`, we are going to use `INNER JOIN` so that for each customer's purchase, there is a corresponding `product_name` and `price`.
+For `dannys_diners.members`, we are actually going to perform a `LEFT JOIN`, since we want to keep all of the customers, and `INNER JOIN` would remove Customer C out of the output table. Furthermore, we want to be able to determine eventually if a customer is a member or not.
+
+```sql
+SELECT *
+FROM dannys_diner.sales
+INNER JOIN dannys_diner.menu
+    ON menu.product_id = sales.product_id
+LEFT JOIN dannys_diner.members
+    ON sales.customer_id = members.customer_id;
+```
+
+| customer_id | order_date | product_id | product_id | product_name | price | customer_id | join_date  |
+| ----------- | ---------- | ---------- | ---------- | ------------ | ----- | ----------- | ---------- |
+| A           | 2021-01-07 | 2          | 2          | curry        | 15    | A           | 2021-01-07 |
+| A           | 2021-01-11 | 3          | 3          | ramen        | 12    | A           | 2021-01-07 |
+| A           | 2021-01-11 | 3          | 3          | ramen        | 12    | A           | 2021-01-07 |
+| A           | 2021-01-10 | 3          | 3          | ramen        | 12    | A           | 2021-01-07 |
+| A           | 2021-01-01 | 1          | 1          | sushi        | 10    | A           | 2021-01-07 |
+| A           | 2021-01-01 | 2          | 2          | curry        | 15    | A           | 2021-01-07 |
+| B           | 2021-01-04 | 1          | 1          | sushi        | 10    | B           | 2021-01-09 |
+| B           | 2021-01-11 | 1          | 1          | sushi        | 10    | B           | 2021-01-09 |
+| B           | 2021-01-01 | 2          | 2          | curry        | 15    | B           | 2021-01-09 |
+| B           | 2021-01-02 | 2          | 2          | curry        | 15    | B           | 2021-01-09 |
+| B           | 2021-01-16 | 3          | 3          | ramen        | 12    | B           | 2021-01-09 |
+| B           | 2021-02-01 | 3          | 3          | ramen        | 12    | B           | 2021-01-09 |
+| C           | 2021-01-01 | 3          | 3          | ramen        | 12    |             |            |
+| C           | 2021-01-01 | 3          | 3          | ramen        | 12    |             |            |
+| C           | 2021-01-07 | 3          | 3          | ramen        | 12    |             |            |
+
+So far so good.
+Now, we could create a CTE, but we can actually recreate the desired table directly.
+
+We will select `sales.customer_id`, `sales.order_date`, `menu.product_name`, and `menu.price`.
+We are almost done. We have 4 out of the 5 columns needed to recreate the desired output table.
+The last thing we need is to create the column `member`, which is either 'Y' (Yes) if the customer is a member at the time of purchase, or 'N' (No) otherwise.
+
+To achieve this, we will use a `CASE` expression:
+
+- If `join_date` is not `NULL` and the `order_date` is on or after the `join_date` (since the screenshot table puts 'Y' for same day), then the customer is a member
+- If `join_date` is not `NULL` and the `order_date` is before 
+- If `join_date` is `NULL`, then the customer is not a member.
+
+Finally, we need to use `ORDER BY` to sort the table by `sales.customer_id`, `sales.order_date`, and `menu.product_name`, and we are done.
+
+Combining everything, our final SQL query for this bonus question looks like this:
+
+```sql
+SELECT
+    sales.customer_id,
+    sales.order_date,
+    menu.product_name,
+    menu.price,
+    CASE
+        WHEN (
+            members.join_date IS NOT NULL AND
+            sales.order_date >= members.join_date) THEN 'Y'
+        WHEN (
+            members.join_date IS NOT NULL AND
+            sales.order_date < members.join_date) THEN 'N'
+        ELSE 'N'        
+    END AS member
+FROM dannys_diner.sales
+INNER JOIN dannys_diner.menu
+    ON menu.product_id = sales.product_id
+LEFT JOIN dannys_diner.members
+    ON sales.customer_id = members.customer_id
+ORDER BY sales.customer_id, sales.order_date, menu.product_name;
+```
+
+| customer_id | order_date | product_name | price | member |
+| ----------- | ---------- | ------------ | ----- | ------ |
+| A           | 2021-01-01 | curry        | 15    | N      |
+| A           | 2021-01-01 | sushi        | 10    | N      |
+| A           | 2021-01-07 | curry        | 15    | Y      |
+| A           | 2021-01-10 | ramen        | 12    | Y      |
+| A           | 2021-01-11 | ramen        | 12    | Y      |
+| A           | 2021-01-11 | ramen        | 12    | Y      |
+| B           | 2021-01-01 | curry        | 15    | N      |
+| B           | 2021-01-02 | curry        | 15    | N      |
+| B           | 2021-01-04 | sushi        | 10    | N      |
+| B           | 2021-01-11 | sushi        | 10    | Y      |
+| B           | 2021-01-16 | ramen        | 12    | Y      |
+| B           | 2021-02-01 | ramen        | 12    | Y      |
+| C           | 2021-01-01 | ramen        | 12    | N      |
+| C           | 2021-01-01 | ramen        | 12    | N      |
+| C           | 2021-01-07 | ramen        | 12    | N      |
+
+### Rank All The Things
+
+Danny also requires further information about the `ranking` of customer products, but he purposely does not need the ranking for non-member purchases so he expects null `ranking` values for the records when customers are not yet part of the loyalty program.
+
+![Image](./image/table2.png)
+
+Our task is to recreate the table in the screenshot above, which is the same as the table from the previous problem, with the addition of the `ranking` column.
+
+So, our first step is to turn the SQL code from the previous problem into a CTE, which we will call `members_cte`:
+
+```sql
+WITH members_cte AS (
+    SELECT
+        sales.customer_id,
+        sales.order_date,
+        menu.product_name,
+        menu.price,
+        CASE
+            WHEN (
+              members.join_date IS NOT NULL AND
+              sales.order_date >= members.join_date) THEN 'Y'
+            WHEN (
+              members.join_date IS NOT NULL AND
+              sales.order_date < members.join_date) THEN 'N'
+            ELSE 'N'        
+        END AS member
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+    LEFT JOIN dannys_diner.members
+        ON sales.customer_id = members.customer_id
+    ORDER BY sales.customer_id, sales.order_date, menu.product_name
+)
+/* ... */
+```
+
+Now, we need to figure out a way to recreate the `ranking` column.
+
+I'll be honest, I'm a bit confused by what the creator of this problem meant by ranking. But from the looks of it, it seems that it is ranked based on order, with the earliest purchased items after becoming a member being ranked 1. Furthermore, there are ties in ranking, specifically on same day order dates.
+
+For this, we are going to use `DENSE_RANK()`.
+We are going to partition by `customer_id` and `member`. It's important to include `member` as well, otherwise we would be including purchases as a non-member into the ranking.
+
+Thus, we have the following:
+
+```sql
+WITH members_cte AS (
+    SELECT
+        sales.customer_id,
+        sales.order_date,
+        menu.product_name,
+        menu.price,
+        CASE
+            WHEN (
+              members.join_date IS NOT NULL AND
+              sales.order_date >= members.join_date) THEN 'Y'
+            WHEN (
+              members.join_date IS NOT NULL AND
+              sales.order_date < members.join_date) THEN 'N'
+            ELSE 'N'        
+        END AS member
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+    LEFT JOIN dannys_diner.members
+        ON sales.customer_id = members.customer_id
+    ORDER BY sales.customer_id, sales.order_date, menu.product_name
+)
+SELECT
+    *,
+    DENSE_RANK() OVER (
+        PARTITION BY cte1.customer_id, cte1.member
+        ORDER BY cte1.order_date ASC
+    ) AS ranking
+FROM members_cte AS cte1;
+```
+
+| customer_id | order_date | product_name | price | member | ranking |
+| ----------- | ---------- | ------------ | ----- | ------ | ------- |
+| A           | 2021-01-01 | curry        | 15    | N      | 1       |
+| A           | 2021-01-01 | sushi        | 10    | N      | 1       |
+| A           | 2021-01-07 | curry        | 15    | Y      | 1       |
+| A           | 2021-01-10 | ramen        | 12    | Y      | 2       |
+| A           | 2021-01-11 | ramen        | 12    | Y      | 3       |
+| A           | 2021-01-11 | ramen        | 12    | Y      | 3       |
+| B           | 2021-01-01 | curry        | 15    | N      | 1       |
+| B           | 2021-01-02 | curry        | 15    | N      | 2       |
+| B           | 2021-01-04 | sushi        | 10    | N      | 3       |
+| B           | 2021-01-11 | sushi        | 10    | Y      | 1       |
+| B           | 2021-01-16 | ramen        | 12    | Y      | 2       |
+| B           | 2021-02-01 | ramen        | 12    | Y      | 3       |
+| C           | 2021-01-01 | ramen        | 12    | N      | 1       |
+| C           | 2021-01-01 | ramen        | 12    | N      | 1       |
+| C           | 2021-01-07 | ramen        | 12    | N      | 2       |
+
+We're almost there.
+The last thing we need to do is convert the `ranking` corresponding to purchases made before the customer became a member into `NULL`.
+
+The approach I went is to actually convert this into a second CTE, which we will call `members_ranking_cte`. Then, using a `CASE` expression, we check if `member = 'Y'`, in which case, we keep the `ranking`. Otherwise, we set `ranking` to `NULL`.
+
+Therefore, our final SQL query is as follows:
+
+```sql
+WITH members_cte AS (
+    SELECT
+        sales.customer_id,
+        sales.order_date,
+        menu.product_name,
+        menu.price,
+        CASE
+            WHEN (
+              members.join_date IS NOT NULL AND
+              sales.order_date >= members.join_date) THEN 'Y'
+            WHEN (
+              members.join_date IS NOT NULL AND
+              sales.order_date < members.join_date) THEN 'N'
+            ELSE 'N'        
+        END AS member
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+    LEFT JOIN dannys_diner.members
+        ON sales.customer_id = members.customer_id
+    ORDER BY sales.customer_id, sales.order_date, menu.product_name
+),
+members_ranking_cte AS (
+    SELECT
+        *,
+        DENSE_RANK() OVER (
+            PARTITION BY cte1.customer_id, cte1.member
+            ORDER BY cte1.order_date ASC
+        ) AS ranking
+    FROM members_cte AS cte1
+)
+
+SELECT
+    cte2.customer_id,
+    cte2.order_date,
+    cte2.product_name,
+    cte2.price,
+    cte2.member,
+    CASE
+        WHEN (cte2.member = 'Y') THEN cte2.ranking
+        ELSE NULL
+    END AS ranking
+FROM members_ranking_cte AS cte2;
+```
+
+| customer_id | order_date | product_name | price | member | ranking |
+| ----------- | ---------- | ------------ | ----- | ------ | ------- |
+| A           | 2021-01-01 | curry        | 15    | N      | null    |
+| A           | 2021-01-01 | sushi        | 10    | N      | null    |
+| A           | 2021-01-07 | curry        | 15    | Y      | 1       |
+| A           | 2021-01-10 | ramen        | 12    | Y      | 2       |
+| A           | 2021-01-11 | ramen        | 12    | Y      | 3       |
+| A           | 2021-01-11 | ramen        | 12    | Y      | 3       |
+| B           | 2021-01-01 | curry        | 15    | N      | null    |
+| B           | 2021-01-02 | curry        | 15    | N      | null    |
+| B           | 2021-01-04 | sushi        | 10    | N      | null    |
+| B           | 2021-01-11 | sushi        | 10    | Y      | 1       |
+| B           | 2021-01-16 | ramen        | 12    | Y      | 2       |
+| B           | 2021-02-01 | ramen        | 12    | Y      | 3       |
+| C           | 2021-01-01 | ramen        | 12    | N      | null    |
+| C           | 2021-01-01 | ramen        | 12    | N      | null    |
+| C           | 2021-01-07 | ramen        | 12    | N      | null    |
