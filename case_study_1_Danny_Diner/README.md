@@ -21,6 +21,7 @@ Link: [Case Study 1 - Danny's Diner](https://8weeksqlchallenge.com/case-study-1/
 - [Question 8](#8-what-is-the-total-items-and-amount-spent-for-each-member-before-they-became-a-member)
 - [Question 9](#9-if-each-1-spent-equates-to-10-points-and-sushi-has-a-2x-points-multiplier---how-many-points-would-each-customer-have)
 - [Question 10](#10-in-the-first-week-after-a-customer-joins-the-program-including-their-join-date-they-earn-2x-points-on-all-items-not-just-sushi---how-many-points-do-customer-a-and-b-have-at-the-end-of-january)
+- [Bonus Questions](#bonus-questions)
 
 ---
 
@@ -32,7 +33,7 @@ Danny's Diner is in need of assistance. The restaurant has captured some very ba
 
 ## Entity Relationship Diagram
 
-![image](./image/diagram.png)
+![image](./images/diagram.png)
 
 ## Case Study Questions
 
@@ -1272,7 +1273,7 @@ The following questions are related to creating basic data tables that Danny and
 
 Recreate the following table output using the available data:
 
-![Image](./image/table1.png)
+![Image](./images/table1.png)
 
 We are tasked with recreating this table in the screenshot above.
 This table we are trying to recreate has the following columns:
@@ -1371,7 +1372,7 @@ ORDER BY sales.customer_id, sales.order_date, menu.product_name;
 
 Danny also requires further information about the `ranking` of customer products, but he purposely does not need the ranking for non-member purchases so he expects null `ranking` values for the records when customers are not yet part of the loyalty program.
 
-![Image](./image/table2.png)
+![Image](./images/table2.png)
 
 Our task is to recreate the table in the screenshot above, which is the same as the table from the previous problem, with the addition of the `ranking` column.
 

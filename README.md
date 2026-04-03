@@ -6,6 +6,8 @@ This repository aim to not only to answer the case studies presented, but also t
 
 Also, I am thinking of adding a Python `pandas` equivalent to each of my solutions in the future.
 
+This challenge is **still in progress**. I am currently on **Case Study 2**.
+
 All solutions are my own. If you are attempting this challenge and are stuck, feel free to look at my solutions for guidance. However, do NOT copy my solution. Furthermore, if any of my solutions happened to look exactly the same or similar to yours, feel free to let me know.
 
 Comments, questions, feedback, and constructive criticism on any of my solutions or work is welcomed. Feel free to send me an [email](mailto:junhyuk.x.lee@gmail.com).
