@@ -852,6 +852,79 @@ Under Assumption 2:
 
 ### 8. What is the total items and amount spent for each member before they became a member?
 
+We are interested in knowing the total amount spent (in dollars) and the total number of items each member spent before becoming a member.
+
+First, we know that we need the name of each items (`menu.product_name`) as well as the price of each item (`menu.price`). Furthermore, we know that we need the information on when the customers became a member (`members.join_date`).
+
+So, we are going to do an `INNER JOIN` for all three tables, and we are going to filter only the rows where `sales.order_date < members.join_date`.
+
+Thus, our SQL query is as follows:
+
+```sql
+SELECT
+    sales.customer_id,
+    members.join_date,
+    sales.order_date,
+    menu.product_name,
+    menu.price
+FROM dannys_diner.sales
+INNER JOIN dannys_diner.menu
+    ON menu.product_id = sales.product_id
+INNER JOIN dannys_diner.members
+    ON members.customer_id = sales.customer_id
+WHERE sales.order_date < members.join_date
+ORDER BY sales.customer_id, sales.order_date;
+```
+
+| customer_id | join_date  | order_date | product_name | price |
+| ----------- | ---------- | ---------- | ------------ | ----- |
+| A           | 2021-01-07 | 2021-01-01 | sushi        | 10    |
+| A           | 2021-01-07 | 2021-01-01 | curry        | 15    |
+| B           | 2021-01-09 | 2021-01-01 | curry        | 15    |
+| B           | 2021-01-09 | 2021-01-02 | curry        | 15    |
+| B           | 2021-01-09 | 2021-01-04 | sushi        | 10    |
+
+With this table, which we will save as a CTE in the next step, we want to know the total price each customer spent and the total number of items.
+Therefore, we are going to use the aggregate functions `COUNT` to find the total number of items, calling it `total_items`.
+We are also going to use `SUM` to find the total price, and we will call it `total_price`.
+Finally, we are going to `GROUP BY` the `customer_id`.
+
+Thus, our final SQL query for this problem is as follows:
+
+```sql
+WITH purchase_before_membership AS (
+    SELECT
+        sales.customer_id,
+        members.join_date,
+        sales.order_date,
+        menu.product_name,
+        menu.price
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+    INNER JOIN dannys_diner.members
+        ON members.customer_id = sales.customer_id
+    WHERE sales.order_date < members.join_date
+    ORDER BY sales.customer_id, sales.order_date
+)
+SELECT
+    cte.customer_id,
+    COUNT(cte.product_name) AS total_items,
+    SUM(cte.price) AS total_price
+FROM purchase_before_membership AS cte
+GROUP BY customer_id;
+```
+
+| customer_id | total_items | total_price |
+| ----------- | ----------- | ----------- |
+| A           | 2           | 25          |
+| B           | 3           | 40          |
+
+**ANSWER:**
+
+- Before becoming a member, Customer A purchased a total of 2 items and spent a total of $25.
+- Before becoming a member, Custoemr B purchased a total of 3 items and spent a total of $40.
+
 ---
 
 ### 9. If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
