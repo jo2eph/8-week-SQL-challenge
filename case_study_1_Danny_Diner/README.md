@@ -1001,13 +1001,13 @@ WITH points_cte AS (
             ELSE menu.price * 10
         END AS points
     FROM dannys_diner.sales
-    INNER JOIN dannys_diner.menu.
+    INNER JOIN dannys_diner.menu
         ON menu.product_id = sales.product_id
     ORDER BY sales.customer_id
 )
 SELECT
-    cte.customer_id
-    SUM(cte.points) AS total_points
+    cte.customer_id,
+    SUM(points) AS total_points
 FROM points_cte AS cte
 GROUP BY cte.customer_id;
 ```
@@ -1026,4 +1026,238 @@ GROUP BY cte.customer_id;
 
 ---
 
-### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have
+### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+
+In this problem, we are focused on the first week after a customer becomes a member, which includes their join date.
+And unlike the previous problem, this time all item on the menu are 2x the points.
+We want to know how many points do each customer, primarily A and B, have at the end of January.
+
+The first thing we are going to do is determine what data we need.
+Since we need to know the `members.join_date` of each member customer, we are going to use `INNER JOIN` to combine `sales` and `members` on `customer_id`.
+
+We also need `sales.order_date` so that we determine the items purchased within the first week after becoming a member and double the points accordingly.
+
+And just like the last problem, we need the `menu.price` to calculate the points based on the price of the item.
+
+So far, our SQL query looks like this, and we will eventually save this into a CTE called `members_cte`:
+
+```sql
+SELECT
+    sales.customer_id,
+    sales.order_date,
+    sales.product_id,
+    members.join_date,
+    menu.price
+FROM dannys_diner.sales
+INNER JOIN dannys_diner.members
+    ON members.customer_id = sales.customer_id
+INNER JOIN dannys_diner.menu
+    ON menu.product_id = sales.product_id;
+```
+
+| customer_id | order_date | product_id | join_date  | price |
+| ----------- | ---------- | ---------- | ---------- | ----- |
+| A           | 2021-01-07 | 2          | 2021-01-07 | 15    |
+| A           | 2021-01-11 | 3          | 2021-01-07 | 12    |
+| A           | 2021-01-11 | 3          | 2021-01-07 | 12    |
+| A           | 2021-01-10 | 3          | 2021-01-07 | 12    |
+| A           | 2021-01-01 | 1          | 2021-01-07 | 10    |
+| A           | 2021-01-01 | 2          | 2021-01-07 | 15    |
+| B           | 2021-01-04 | 1          | 2021-01-09 | 10    |
+| B           | 2021-01-11 | 1          | 2021-01-09 | 10    |
+| B           | 2021-01-01 | 2          | 2021-01-09 | 15    |
+| B           | 2021-01-02 | 2          | 2021-01-09 | 15    |
+| B           | 2021-01-16 | 3          | 2021-01-09 | 12    |
+| B           | 2021-02-01 | 3          | 2021-01-09 | 12    |
+
+Next, we want to know which row, which sales, are within the week after the customer became a member.
+Recall that there are 7 days in a week.
+To get the date one week after the customer became a member, including the join date, we add 6 to the `join_date`.
+To determine if a purchase is within the week after the member became a member (including the join date), we write the following conditional. Note that it's important to use `AND` since we want only the dates in between the 7-day range to count towards the bonus. Note that this will return a Boolean (true or false).
+Finally, we will save this into a column `is_valid`:
+
+```sql
+(
+    sales.order_date >= members.join_date AND
+    sales.order_date <= members.join_date + 6
+) AS is_valid
+```
+
+Furthermore, recall that the problem states "by the end of January".
+Thus, we are only interested in `order_date` where the month is January (1).
+
+We can use `EXTRACT(MONTH FROM sales.order_date) = 1` to extract the month from `sales.order_date` and check to make sure it is January.
+
+Combining everything we've done thus far, we get the following SQL query:
+
+```sql
+WITH members_cte AS (
+    SELECT
+        sales.customer_id,
+        members.join_date,
+        sales.order_date,
+        sales.product_id,
+        menu.price,
+        (
+            sales.order_date >= members.join_date AND
+            sales.order_date <= members.join_date + 6
+        ) AS is_valid
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.members
+        ON members.customer_id = sales.customer_id
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+    WHERE (
+        EXTRACT(MONTH FROM sales.order_date) = 1
+    )
+    ORDER BY sales.customer_id, sales.order_date
+)
+SELECT
+    *
+FROM members_cte;
+```
+
+| customer_id | join_date  | order_date | product_id | price | is_valid |
+| ----------- | ---------- | ---------- | ---------- | ----- | -------- |
+| A           | 2021-01-07 | 2021-01-01 | 2          | 15    | false    |
+| A           | 2021-01-07 | 2021-01-01 | 1          | 10    | false    |
+| A           | 2021-01-07 | 2021-01-07 | 2          | 15    | true     |
+| A           | 2021-01-07 | 2021-01-10 | 3          | 12    | true     |
+| A           | 2021-01-07 | 2021-01-11 | 3          | 12    | true     |
+| A           | 2021-01-07 | 2021-01-11 | 3          | 12    | true     |
+| B           | 2021-01-09 | 2021-01-01 | 2          | 15    | false    |
+| B           | 2021-01-09 | 2021-01-02 | 2          | 15    | false    |
+| B           | 2021-01-09 | 2021-01-04 | 1          | 10    | false    |
+| B           | 2021-01-09 | 2021-01-11 | 1          | 10    | true     |
+| B           | 2021-01-09 | 2021-01-16 | 3          | 12    | false    |
+
+But we're not done yet!
+
+Now, we need to compute the points.
+
+We are using the same rules from problem 9, which is that every $1 spent is 10 points, with sushi being twice the points.
+
+Here, the rule is slightly different.
+Every item, not just sushi, within the week after a customer became a member gets double points.
+
+Just like the previous problem, we are going to use `CASE` to create a few if-else expressions:
+
+- If the order is within the week after the customer joined, regardless of what item it is, the points are calculated as price * 20.
+- If the order is NOT within the week after the customer joined, AND the item is sushi, the points are calculated as price * 20.
+- Otherwise, the points are calculated as price * 10.
+
+This translates to the following SQL `CASE` expression:
+
+```sql
+CASE
+    WHEN (is_valid) THEN price * 20
+    WHEN (NOT is_valid AND product_id = 1) THEN price * 20
+    ELSE price * 10
+END AS points
+```
+
+Combining everything, we get the following SQL query:
+
+```sql
+WITH members_cte AS (
+    SELECT
+        sales.customer_id,
+        members.join_date,
+        sales.order_date,
+        sales.product_id,
+        menu.price,
+        (
+            sales.order_date >= members.join_date AND
+            sales.order_date <= members.join_date + 6
+        ) AS is_valid
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.members
+        ON members.customer_id = sales.customer_id
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+    WHERE (
+        EXTRACT(MONTH FROM sales.order_date) = 1
+    )
+    ORDER BY sales.customer_id, sales.order_date
+)
+SELECT
+    *,
+    CASE
+        WHEN (is_valid) THEN price * 20
+        WHEN (NOT is_valid AND product_id = 1) THEN price * 20
+        ELSE price * 10
+    END AS points
+FROM members_cte AS cte;
+```
+
+| customer_id | join_date  | order_date | product_id | price | is_valid | points |
+| ----------- | ---------- | ---------- | ---------- | ----- | -------- | ------ |
+| A           | 2021-01-07 | 2021-01-01 | 2          | 15    | false    | 150    |
+| A           | 2021-01-07 | 2021-01-01 | 1          | 10    | false    | 200    |
+| A           | 2021-01-07 | 2021-01-07 | 2          | 15    | true     | 300    |
+| A           | 2021-01-07 | 2021-01-10 | 3          | 12    | true     | 240    |
+| A           | 2021-01-07 | 2021-01-11 | 3          | 12    | true     | 240    |
+| A           | 2021-01-07 | 2021-01-11 | 3          | 12    | true     | 240    |
+| B           | 2021-01-09 | 2021-01-01 | 2          | 15    | false    | 150    |
+| B           | 2021-01-09 | 2021-01-02 | 2          | 15    | false    | 150    |
+| B           | 2021-01-09 | 2021-01-04 | 1          | 10    | false    | 200    |
+| B           | 2021-01-09 | 2021-01-11 | 1          | 10    | true     | 200    |
+| B           | 2021-01-09 | 2021-01-16 | 3          | 12    | false    | 120    |
+
+We're almost there!
+The last thing we need to do is get the total points for each customer.
+
+Before we do this, we are actually going to transform this into a second CTE, called `points_cte`.
+Then, we are going to use `SUM` on the `points` column to compute the total number of points, and save it as `total_points`.
+Finally, we are going to group according to each customers, using `GROUP BY` on `customer_id`.
+
+Therefore, our final SQL query is as follows:
+
+```sql
+WITH members_cte AS (
+    SELECT
+        sales.customer_id,
+        members.join_date,
+        sales.order_date,
+        sales.product_id,
+        menu.price,
+        (
+            sales.order_date >= members.join_date AND
+            sales.order_date <= members.join_date + 6
+        ) AS is_valid
+    FROM dannys_diner.sales
+    INNER JOIN dannys_diner.members
+        ON members.customer_id = sales.customer_id
+    INNER JOIN dannys_diner.menu
+        ON menu.product_id = sales.product_id
+    WHERE (
+        EXTRACT(MONTH FROM sales.order_date) = 1
+    )
+    ORDER BY sales.customer_id, sales.order_date
+),
+points_cte AS (
+    SELECT
+        *,
+        CASE
+            WHEN (cte1.is_valid) THEN cte1.price * 20
+            WHEN (NOT cte1.is_valid AND cte1.product_id = 1) THEN cte1.price * 20
+            ELSE cte1.price * 10
+        END AS points
+    FROM members_cte AS cte1
+)
+SELECT
+    cte2.customer_id,
+    SUM(cte2.points) AS total_points
+FROM points_cte AS cte2
+GROUP BY cte2.customer_id;
+```
+
+| customer_id | total_points |
+| ----------- | ------------ |
+| A           | 1370         |
+| B           | 820          |
+
+**ANSWER:**
+
+- Customer A has a total of 1370 points.
+- Customer B has a total of 820 points.
