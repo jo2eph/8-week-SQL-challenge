@@ -1319,7 +1319,7 @@ The last thing we need is to create the column `member`, which is either 'Y' (Ye
 To achieve this, we will use a `CASE` expression:
 
 - If `join_date` is not `NULL` and the `order_date` is on or after the `join_date` (since the screenshot table puts 'Y' for same day), then the customer is a member
-- If `join_date` is not `NULL` and the `order_date` is before 
+- If `join_date` is not `NULL` and the `order_date` is before.
 - If `join_date` is `NULL`, then the customer is not a member.
 
 Finally, we need to use `ORDER BY` to sort the table by `sales.customer_id`, `sales.order_date`, and `menu.product_name`, and we are done.
