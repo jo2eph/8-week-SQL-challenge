@@ -20,7 +20,7 @@ Link: [Case Study 1 - Danny's Diner](https://8weeksqlchallenge.com/case-study-1/
 - [Question 7](#7-which-item-was-purchased-just-before-the-customer-became-a-member)
 - [Question 8](#8-what-is-the-total-items-and-amount-spent-for-each-member-before-they-became-a-member)
 - [Question 9](#9-if-each-1-spent-equates-to-10-points-and-sushi-has-a-2x-points-multiplier---how-many-points-would-each-customer-have)
-- [Question 10](#10-in-the-first-week-after-a-customer-joins-the-program-including-their-join-date-they-earn-2x-points-on-all-items-not-just-sushi---how-many-points-do-customer-a-and-b-have)
+- [Question 10](#10-in-the-first-week-after-a-customer-joins-the-program-including-their-join-date-they-earn-2x-points-on-all-items-not-just-sushi---how-many-points-do-customer-a-and-b-have-at-the-end-of-january)
 
 ---
 
@@ -230,7 +230,7 @@ ORDER BY customer_id ASC;
 **ANSWER:**
 
 - Customer A visited a total of 4 days.
-- Customer B visited a total of 6 dys.
+- Customer B visited a total of 6 days.
 - Customer C visited a total of 2 days.
 
 ---
@@ -675,7 +675,7 @@ Assuming that in the case of `order_date` and `join_date` being equal, and custo
 
 ### 7. Which item was purchased just before the customer became a member?
 
-Here, we want to know what item each customer purchased just before becoming a member. 
+Here, we want to know what item each customer purchased just before becoming a member.
 
 Let's start by creating our CTE and selecting the data we need for this problem.
 In particular, we are going to do `INNER JOIN` on all three tables, since we need `menu.product_name` and `members.join_date`.
