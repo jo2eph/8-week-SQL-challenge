@@ -923,7 +923,7 @@ GROUP BY customer_id;
 **ANSWER:**
 
 - Before becoming a member, Customer A purchased a total of 2 items and spent a total of $25.
-- Before becoming a member, Custoemr B purchased a total of 3 items and spent a total of $40.
+- Before becoming a member, Customer B purchased a total of 3 items and spent a total of $40.
 
 ---
 
