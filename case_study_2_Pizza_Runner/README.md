@@ -10,7 +10,6 @@ Link: [Case Study 2 - Pizza Runner](https://8weeksqlchallenge.com/case-study-2/)
 
 - [Introduction](#introduction)
 - [Data](#data)
-- [Data Cleaning](#data-cleaning)
 - [Case Study Questions](#case-study-questions)
 
 ---
@@ -102,7 +101,6 @@ Pizza Runner only has two pizzas available: Meat Lovers or Vegetarian.
 | -------- | ----------- |
 | 1        | Meat Lovers |
 | 2        | Vegetarian  |
-
 
 ### Table 5: pizza_recipes
 
