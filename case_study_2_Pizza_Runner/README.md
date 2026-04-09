@@ -146,6 +146,8 @@ This contains all of the `topping_name` values with the corresponding `topping_i
 9. What was the total volume of pizzas ordered for each hour of the day?
 10. What was the volume of orders for each day of the week?
 
+[Answers](https://github.com/jo2eph/8-week-SQL-challenge/blob/main/case_study_2_Pizza_Runner/1_Pizza_Metrics.md)
+
 ### B. Runner and Customer Experience
 
 1. How many runners signed up for each 1 week period? (i.e. week starts 2021-01-01)
@@ -155,6 +157,8 @@ This contains all of the `topping_name` values with the corresponding `topping_i
 5. What was the difference between the longest and shortest delivery times for all orders?
 6. What was the average speed for each runner for each delivery and do you notice any trend for these values?
 7. What is the successful delivery percentage for each runner?
+
+[Answers](https://github.com/jo2eph/8-week-SQL-challenge/blob/main/case_study_2_Pizza_Runner/2_Runner_and_Customer_Experience.md)
 
 ### C. Ingredients Optimisation
 
@@ -173,6 +177,8 @@ This contains all of the `topping_name` values with the corresponding `topping_i
     - For example: `"Meat Lovers: 2xBacon, Beef, ... , Salami"`
 
 6. What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
+
+[Answers](https://github.com/jo2eph/8-week-SQL-challenge/blob/main/case_study_2_Pizza_Runner/3_Ingredient_Optimization.md)
 
 ### D. Pricing and Ratings
 
@@ -195,9 +201,13 @@ This contains all of the `topping_name` values with the corresponding `topping_i
 
 5. If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
 
+[Answers](https://github.com/jo2eph/8-week-SQL-challenge/blob/main/case_study_2_Pizza_Runner/4_Pricing_and_Ratings.md)
+
 ### E. Bonus Questions
 
 If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an `INSERT` statement to demonstrate what would happen if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?
+
+[Answers](https://github.com/jo2eph/8-week-SQL-challenge/blob/main/case_study_2_Pizza_Runner/5_Bonus_questions.md)
 
 ---
 

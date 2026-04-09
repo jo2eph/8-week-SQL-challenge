@@ -8,12 +8,20 @@
 
 ## Contents
 
+- [Abstract](#abstract)
+- [Question 1](#1-what-are-the-standard-ingredients-for-each-pizza)
+- [Question 2](#2-what-was-the-most-commonly-added-extra)
+- [Question 3](#3-what-was-the-most-common-exclusion)
+- [Question 4](#4-generate-an-order-item-for-each-record-in-the-customers_orders-table-in-the-format-of-one-of-the-following)
+- [Question 5](#6-what-is-the-total-quantity-of-each-ingredient-used-in-all-delivered-pizzas-sorted-by-most-frequent-first)
+- [Question 6](#6-what-is-the-total-quantity-of-each-ingredient-used-in-all-delivered-pizzas-sorted-by-most-frequent-first)
+
 ---
 
 ## Abstract
 
 In this section, we will answer questions in section C. Ingredient Optimisation.
-We will answer the following questions:
+We will answer the following six questions:
 
 1. What are the standard ingredients for each pizza?
 2. What was the most commonly added extra?
@@ -32,3 +40,30 @@ We will answer the following questions:
 6. What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
 
 ---
+
+## 1. What are the standard ingredients for each pizza?
+
+---
+
+## 2. What was the most commonly added extra?
+
+---
+
+## 3. What was the most common exclusion?
+
+---
+
+## 4. Generate an order item for each record in the `customers_orders` table in the format of one of the following
+
+    - `Meat Lovers`
+    - `Meat Lovers - Exclude Beef`
+    - `Meat Lovers - Extra Bacon`
+    - `Meat Lovers - Exclude Cheese, Bacon - Extra Mushroom, Peppers`
+
+---
+
+## 5. Generate an alphabetically ordered comma separated ingredient list for each pizza order from the `customer_orders` table and add a 2x in front of any relevant ingredients.
+
+---
+
+## 6. What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
