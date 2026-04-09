@@ -11,6 +11,7 @@ Link: [Case Study 2 - Pizza Runner](https://8weeksqlchallenge.com/case-study-2/)
 - [Introduction](#introduction)
 - [Data](#data)
 - [Case Study Questions](#case-study-questions)
+- [Pages](#pages)
 
 ---
 
@@ -199,3 +200,16 @@ This contains all of the `topping_name` values with the corresponding `topping_i
 If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an `INSERT` statement to demonstrate what would happen if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?
 
 ---
+
+## Pages
+
+Because this case study has a lot of questions, we are going to split each section section into their own markdown files.
+
+Links:
+
+- [Part 0: Data Cleaning & Transforming](https://github.com/jo2eph/8-week-SQL-challenge/blob/main/case_study_2_Pizza_Runner/0_Data_Cleaning.md)
+- [Part 1: Pizza Metrics](https://github.com/jo2eph/8-week-SQL-challenge/blob/main/case_study_2_Pizza_Runner/1_Pizza_Metrics.md)
+- [Part 2: Runner and Customer Experience](https://github.com/jo2eph/8-week-SQL-challenge/blob/main/case_study_2_Pizza_Runner/2_Runner_and_Customer_Experience.md)
+- [Part 3: Ingredient Optimisation](https://github.com/jo2eph/8-week-SQL-challenge/blob/main/case_study_2_Pizza_Runner/3_Ingredient_Optimization.md)
+- [Part 4: Pricing and Ratings](https://github.com/jo2eph/8-week-SQL-challenge/blob/main/case_study_2_Pizza_Runner/4_Pricing_and_Ratings.md)
+- [Part 5: Bonus Questions](https://github.com/jo2eph/8-week-SQL-challenge/blob/main/case_study_2_Pizza_Runner/5_Bonus_questions.md)
