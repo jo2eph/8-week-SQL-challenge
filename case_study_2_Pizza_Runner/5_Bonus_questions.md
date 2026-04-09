@@ -1,4 +1,4 @@
-# Pizza Runner Part 4: Pricing and Ratings
+# Pizza Runner Part 5: Bonus Questions
 
 [Case Study 2](https://github.com/jo2eph/8-week-SQL-challenge/tree/main/case_study_2_Pizza_Runner)
 
