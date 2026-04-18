@@ -42,6 +42,22 @@ In particular, we are going to answer the following ten questions:
 
 ## 1. How many pizzas were ordered?
 
+To calculate how many pizzas were ordered, we simply count how many rows are in `customer_orders_cleaned`.
+
+```sql
+SELECT
+    COUNT(*) AS total_pizzas_ordered
+FROM pizza_runner.customer_orders_cleaned;
+```
+
+| total_pizzas_ordered |
+|----------------------|
+|                   14 |
+
+**Answer:**
+
+A total of 14 pizzas were ordered.
+
 ---
 
 ## 2. How many unique customer orders were made?

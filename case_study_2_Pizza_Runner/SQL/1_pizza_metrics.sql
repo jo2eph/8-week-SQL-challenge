@@ -16,7 +16,9 @@ Questions:
 */
 
 -- 1. How many pizzas were ordered?
-
+SELECT
+    COUNT(*) AS total_pizzas_ordered
+FROM pizza_runner.customer_orders_cleaned;
 
 -- 2. How many unique customer orders were made?
 
