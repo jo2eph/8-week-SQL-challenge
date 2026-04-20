@@ -82,6 +82,39 @@ FROM pizza_runner.customer_orders_cleaned AS co;
 
 ## 3. How many successful orders were delivered by each runner?
 
+We want to know how many successful orders were delivered by each runner.
+
+What does that mean? If we look at the `runner_orders_cleaned` table, we can see that each row corresponds to an individual order delivery by a runner. We can also see that there is a column called `cancellation`, which gives a reason (if applicable) for the cancellation.
+Thus, we define a successful order as an order that is not cancelled, i.e., does not have a value in the `cancellation` column.
+
+Thus, we will use the aggregate `COUNT` to count the total number of deliveries where `cancellation` is null or an empty string.
+
+Lastly, we use `GROUP BY` to group by `runner_id`.
+
+Thus, our SQL query is as follows:
+
+```sql
+SELECT
+    ro.runner_id,
+    COUNT(*) AS total_successful_orders
+FROM pizza_runner.runner_orders_cleaned AS ro
+WHERE ro.cancellation = '' OR ro.cancellation IS NULL
+GROUP BY ro.runner_id
+ORDER BY ro.runner_id;
+```
+
+| runner_id | total_successful_orders |
+|-----------|-------------------------|
+|         1 |                       4 |
+|         2 |                       3 |
+|         3 |                       1 |
+
+**Answer:**
+
+- Runner 1 made 4 successful orders.
+- Runner 2 made 3 successful orders.
+- Runner 3 made 1 successful orders.
+
 ---
 
 ## 4. How many of each type of pizza was delivered?

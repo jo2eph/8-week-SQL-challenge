@@ -26,7 +26,13 @@ SELECT
 FROM pizza_runner.customer_orders_cleaned AS co;
 
 -- 3. How many successful orders were delivered by each runner?
-
+SELECT
+    ro.runner_id,
+    COUNT(*) AS total_successful_orders
+FROM pizza_runner.runner_orders_cleaned AS ro
+WHERE ro.cancellation = '' OR ro.cancellation IS NULL
+GROUP BY ro.runner_id
+ORDER BY ro.runner_id;
 
 -- 4. How many of each type of pizza was delivered?
 
