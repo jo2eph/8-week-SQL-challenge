@@ -62,6 +62,22 @@ A total of 14 pizzas were ordered.
 
 ## 2. How many unique customer orders were made?
 
+To find how many unique customer orders were made, we are going to count how many distinct `order_id` there are in `customer_orders_cleaned`, since each `order_id` represent an individual order.
+
+```sql
+SELECT
+    COUNT(DISTINCT co.order_id) AS unique_customer_orders
+FROM pizza_runner.customer_orders_cleaned AS co;
+```
+
+| unique_customer_orders |
+|------------------------|
+|                     10 |
+
+**Answer:**
+
+10 unique customer orders were made.
+
 ---
 
 ## 3. How many successful orders were delivered by each runner?

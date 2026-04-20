@@ -53,7 +53,7 @@ CREATE TABLE runner_orders_cleaned AS (
         END AS duration_min,
         -- Clean cancellation
         CASE
-            WHEN ro.cancellation IS NULL OR ro.cancellation LIKE 'null' THEN NULL
+            WHEN ro.cancellation IS NULL OR ro.cancellation LIKE 'null' THEN ''
             ELSE ro.cancellation
         END AS cancellation
     FROM pizza_runner.runner_orders AS ro

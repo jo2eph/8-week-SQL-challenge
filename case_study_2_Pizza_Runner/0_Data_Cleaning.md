@@ -304,7 +304,9 @@ For this table, we need to address the following issues:
 - `duration` has the same problems with `distance` in that the formatting is inconsistent. Some of these rows do not have a unit. Also, there are a few `'null'` values.
 - `cancellation` has empty and `'null'` entries.
 
-Let's start by replacing the null entries in `pickup_time` with an empty string.
+Let's start by replacing the null entries in `pickup_time` with NULL.
+
+The reason we replace it with a NULL value and not an empty string is because `pickup_time` is a datetime column, not a string.
 
 ```sql
 SELECT
@@ -312,7 +314,7 @@ SELECT
     ro.runner_id,
     -- Replace nulls in pickup_time
     CASE
-        WHEN ro.pickup_time IS NULL OR ro.pickup_time LIKE 'null' THEN ''
+        WHEN ro.pickup_time IS NULL OR ro.pickup_time LIKE 'null' THEN NULL
         ELSE ro.pickup_time
     END AS pickup_time,
     ro.distance,
@@ -359,12 +361,12 @@ CREATE TABLE runner_orders_cleaned AS (
         ro.runner_id,
         -- Replace nulls in pickup_time
         CASE
-            WHEN ro.pickup_time IS NULL OR ro.pickup_time LIKE 'null' THEN ''
+            WHEN ro.pickup_time IS NULL OR ro.pickup_time LIKE 'null' THEN NULL
             ELSE ro.pickup_time
         END AS pickup_time,
         -- Clean distance
         CASE
-            WHEN ro.distance IS NULL OR ro.distance LIKE 'null' THEN ''
+            WHEN ro.distance IS NULL OR ro.distance LIKE 'null' THEN NULL
             WHEN ro.distance LIKE '%km' THEN TRIM('km' FROM ro.distance)
             ELSE ro.distance
         END AS distance_km,
@@ -390,7 +392,7 @@ CREATE TABLE runner_orders_cleaned AS (
 Lastly, we need to clean the `duration` column.
 
 Similar to `distance`, `duration` has inconsistent formatting, and it has null values represented by the string 'null'.
-Let's do a similar process with what we did to `distance`.
+Let's do a similar process with what we did to `distance` and replace the "null" values with NULL.
 
 Our updated SQL query looks like this:
 
@@ -400,18 +402,18 @@ SELECT
     ro.runner_id,
     -- Replace nulls in pickup_time
     CASE
-        WHEN ro.pickup_time IS NULL OR ro.pickup_time LIKE 'null' THEN ''
+        WHEN ro.pickup_time IS NULL OR ro.pickup_time LIKE 'null' THEN NULL
         ELSE ro.pickup_time
     END AS pickup_time,
     -- Clean distance
     CASE
-        WHEN ro.distance IS NULL OR ro.distance LIKE 'null' THEN ''
+        WHEN ro.distance IS NULL OR ro.distance LIKE 'null' THEN NULL
         WHEN ro.distance LIKE '%km' THEN TRIM('km' FROM ro.distance)
         ELSE ro.distance
     END AS distance_km,
     -- Clean duration
     CASE 
-        WHEN ro.duration IS NULL OR ro.duration LIKE 'null' THEN ''
+        WHEN ro.duration IS NULL OR ro.duration LIKE 'null' THEN NULL
         WHEN ro.duration LIKE '%min' THEN TRIM('min' FROM ro.duration)
         WHEN ro.duration LIKE '%mins' THEN TRIM('mins' FROM ro.duration)
         WHEN ro.duration LIKE '%minute' THEN TRIM('minute' FROM ro.duration)
@@ -435,7 +437,7 @@ FROM pizza_runner.runner_orders AS ro
 |        9 |         2 |                     |             |              | Customer Cancellation   |
 |       10 |         1 | 2020-01-11 18:50:20 | 10          | 10           | null                    |
 
-Finally, we need to clean the `cancellation` column by removing the null entries.
+Finally, we need to clean the `cancellation` column by removing the null entries and replacing it with an empty string since `cancellation` is a string.
 
 Thus, our updated SQL query is as follows:
 
@@ -445,18 +447,18 @@ SELECT
     ro.runner_id,
     -- Replace nulls in pickup_time
     CASE
-        WHEN ro.pickup_time IS NULL OR ro.pickup_time LIKE 'null' THEN ''
+        WHEN ro.pickup_time IS NULL OR ro.pickup_time LIKE 'null' THEN NULL
         ELSE ro.pickup_time
     END AS pickup_time,
     -- Clean distance
     CASE
-        WHEN ro.distance IS NULL OR ro.distance LIKE 'null' THEN ''
+        WHEN ro.distance IS NULL OR ro.distance LIKE 'null' THEN NULL
         WHEN ro.distance LIKE '%km' THEN TRIM('km' FROM ro.distance)
         ELSE ro.distance
     END AS distance_km,
     -- Clean duration
     CASE 
-        WHEN ro.duration IS NULL OR ro.duration LIKE 'null' THEN ''
+        WHEN ro.duration IS NULL OR ro.duration LIKE 'null' THEN NULL
         WHEN ro.duration LIKE '%min' THEN TRIM('min' FROM ro.duration)
         WHEN ro.duration LIKE '%mins' THEN TRIM('mins' FROM ro.duration)
         WHEN ro.duration LIKE '%minute' THEN TRIM('minute' FROM ro.duration)
@@ -631,7 +633,7 @@ CREATE TABLE runner_orders_cleaned AS (
         END AS duration_min,
         -- Clean cancellation
         CASE
-            WHEN ro.cancellation IS NULL OR ro.cancellation LIKE 'null' THEN NULL
+            WHEN ro.cancellation IS NULL OR ro.cancellation LIKE 'null' THEN ''
             ELSE ro.cancellation
         END AS cancellation
     FROM pizza_runner.runner_orders AS ro
