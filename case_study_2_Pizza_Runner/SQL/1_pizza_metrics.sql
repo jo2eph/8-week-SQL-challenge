@@ -35,7 +35,18 @@ GROUP BY ro.runner_id
 ORDER BY ro.runner_id;
 
 -- 4. How many of each type of pizza was delivered?
-
+SELECT
+    co.pizza_id,
+    pizza.pizza_name,
+    COUNT(*) AS total_delivered
+FROM pizza_runner.customer_orders_cleaned AS co
+JOIN pizza_runner.pizza_names AS pizza
+    ON co.pizza_id = pizza.pizza_id
+JOIN pizza_runner.runner_orders_cleaned AS ro
+    ON co.order_id = ro.order_id
+WHERE ro.cancellation = '' OR ro.cancellation IS NULL
+GROUP BY co.pizza_id, pizza.pizza_name
+ORDER BY co.pizza_id;
 
 -- 5. How many Vegetarian and Meatlovers were ordered by each customer?
 

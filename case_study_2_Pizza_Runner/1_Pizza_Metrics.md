@@ -119,6 +119,45 @@ ORDER BY ro.runner_id;
 
 ## 4. How many of each type of pizza was delivered?
 
+In this question, we want to know how many of each type of pizza was delivered.
+
+We are going to perform two `JOIN`.
+We are going to join `customer_orders_cleaned` with `pizza_names` on `pizza_id` in order to get the name of the pizza.
+We are also going to join `customer_orders_cleaned` on `runner_orders_cleaned` so we know which orders are successful and which are cancelled.
+
+Then, we use `WHERE` to select only the orders that were successful, i.e. there is no value in the `cancellation` column.
+
+Since we want to know how many of each type of pizza was delivered, we are going to use `GROUP BY` to group by `pizza_id` and `pizza_name`. Note that it's fine to use just `pizza_name`.
+
+Next, we finish it off by using the aggregate function `COUNT` to get the actual total count for each type of pizza.
+
+Thus, our final SQL query is as follows:
+
+```sql
+SELECT
+    co.pizza_id,
+    pizza.pizza_name,
+    COUNT(*) AS total_delivered
+FROM pizza_runner.customer_orders_cleaned AS co
+JOIN pizza_runner.pizza_names AS pizza
+    ON co.pizza_id = pizza.pizza_id
+JOIN pizza_runner.runner_orders_cleaned AS ro
+    ON co.order_id = ro.order_id
+WHERE ro.cancellation = '' OR ro.cancellation IS NULL
+GROUP BY co.pizza_id, pizza.pizza_name
+ORDER BY co.pizza_id;
+```
+
+| pizza_id | pizza_name | total_delivered |
+|----------|------------|-----------------|
+|        1 | Meatlovers |               9 |
+|        2 | Vegetarian |               3 |
+
+**Answer:**
+
+- Meat lovers pizza was delivered 9 times.
+- Vegetarian pizza was delivered 3 times.
+
 ---
 
 ## 5. How many Vegetarian and Meatlovers were ordered by each customer?
