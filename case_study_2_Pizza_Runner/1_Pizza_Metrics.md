@@ -395,10 +395,44 @@ Only 1 pizza delivered had both exclusions and extras.
 
 ## 9. What was the total volume of pizzas ordered for each hour of the day?
 
+We want to find the total volume of pizzas ordered for each hour of the day.
+
+To get the hour of the day from `co.order_time`, we use `EXTRACT`, which would look like the following: `EXTRACT(HOUR FROM order_time)`.
+We will save this as `order_hour`.
+
+Since we want to know the total number of pizzas ordered for each hour, we will be using `GROUP BY` to group our data by `order_hour`.
+And since we want the total volume of pizzas ordered for each `order_hour`, we will use the aggregate function `COUNT`, which we will save as `total_pizzas_ordered`.
+
+Lastly, we will `ORDER BY` to sort the data by `order_hour`.
+
+Thus, our final SQL query is as follows:
+
 ```sql
+SELECT
+    EXTRACT(HOUR FROM co.order_time) AS order_hour,
+    COUNT(*) AS total_pizzas_ordered
+FROM pizza_runner.customer_orders_cleaned AS co
+GROUP BY order_hour
+ORDER BY order_hour;
 ```
 
+| order_hour | total_pizzas_ordered |
+|------------|----------------------|
+|         11 |                    1 |
+|         13 |                    3 |
+|         18 |                    3 |
+|         19 |                    1 |
+|         21 |                    3 |
+|         23 |                    3 |
+
 **Answer:**
+
+- A total of 1 pizza was ordered at the hour of 11 AM.
+- A total of 3 pizzas were ordered at the hour of 13 (1 PM).
+- A total of 3 pizzas were ordered at the hour of 18 (6 PM).
+- A total of 3 pizzas were ordered at the hour of 19 (7 PM).
+- A total of 1 pizza was ordered at the hour of 21 (9 PM).
+- A total of 3 pizzas were ordered at the hour of 23 (11 PM).
 
 ---
 

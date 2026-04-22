@@ -118,6 +118,11 @@ SELECT
 FROM delivered_cte AS cte;
 
 -- 9. What was the total volume of pizzas ordered for each hour of the day?
-
+SELECT
+    EXTRACT(HOUR FROM co.order_time) AS order_hour,
+    COUNT(*) AS total_pizzas_ordered
+FROM pizza_runner.customer_orders_cleaned AS co
+GROUP BY order_hour
+ORDER BY order_hour;
 
 -- 10. What was the volume of orders for each day of the week?
