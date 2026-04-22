@@ -430,8 +430,8 @@ ORDER BY order_hour;
 - A total of 1 pizza was ordered at the hour of 11 AM.
 - A total of 3 pizzas were ordered at the hour of 13 (1 PM).
 - A total of 3 pizzas were ordered at the hour of 18 (6 PM).
-- A total of 3 pizzas were ordered at the hour of 19 (7 PM).
-- A total of 1 pizza was ordered at the hour of 21 (9 PM).
+- A total of 1 pizza was ordered at the hour of 19 (7 PM).
+- A total of 3 pizzas were ordered at the hour of 21 (9 PM).
 - A total of 3 pizzas were ordered at the hour of 23 (11 PM).
 
 ---
