@@ -62,7 +62,7 @@ We will answer the following six questions:
 
 ---
 
-## 5. Generate an alphabetically ordered comma separated ingredient list for each pizza order from the `customer_orders` table and add a 2x in front of any relevant ingredients.
+## 5. Generate an alphabetically ordered comma separated ingredient list for each pizza order from the `customer_orders` table and add a 2x in front of any relevant ingredients
 
 ---
 

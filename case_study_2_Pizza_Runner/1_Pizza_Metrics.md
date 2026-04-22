@@ -255,10 +255,101 @@ The maximum number of pizzas delivered in a single order is 3 (which corresponds
 
 ## 7. For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
 
+In this question, we want to find how many delivered pizzas had at least one change and how many delivered pizzas with no changes were delivered for each customer.
+
+The first thing we will do is create a CTE containing the orders that were successfully delivered, and we will call it `delivered_cte`.
+
 ```sql
+WITH delivered_cte AS (
+    SELECT
+        co.order_id,
+        co.customer_id,
+        co.pizza_id,
+        co.exclusions,
+        co.extras,
+        co.order_time
+    FROM pizza_runner.customer_orders_cleaned AS co
+    JOIN pizza_runner.runner_orders_cleaned AS ro
+        ON co.order_id = ro.order_id
+    WHERE ro.cancellation = '' OR ro.cancellation IS NULL
+)
+/* ... */
 ```
 
+This CTE gives us the following table:
+
+| order_id | customer_id | pizza_id | exclusions | extras |     order_time      |
+|----------|-------------|----------|------------|--------|---------------------|
+|        1 |         101 |        1 |            |        | 2020-01-01 18:05:02 |
+|        2 |         101 |        1 |            |        | 2020-01-01 19:00:52 |
+|        3 |         102 |        1 |            |        | 2020-01-02 23:51:23 |
+|        3 |         102 |        2 |            |        | 2020-01-02 23:51:23 |
+|        4 |         103 |        1 | 4          |        | 2020-01-04 13:23:46 |
+|        4 |         103 |        1 | 4          |        | 2020-01-04 13:23:46 |
+|        4 |         103 |        2 | 4          |        | 2020-01-04 13:23:46 |
+|        5 |         104 |        1 |            | 1      | 2020-01-08 21:00:29 |
+|        7 |         105 |        2 |            | 1      | 2020-01-08 21:20:29 |
+|        8 |         102 |        1 |            |        | 2020-01-09 23:54:33 |
+|       10 |         104 |        1 |            |        | 2020-01-11 18:34:49 |
+|       10 |         104 |        1 | 2, 6       | 1, 4   | 2020-01-11 18:34:49 |
+
+Now, we want to get the count of delivered pizzas with at least one change, and the count of delivered pizzas with no change.
+
+What it means for a pizza to have at least one change in this case is to have a non-empty value in either the `exclusions` or the `extras` column.
+
+Thus, what we want to do is for each customer:
+
+- Count the number of rows where *either* the `exclusions` *or* `extras` is not equal to the empty string '', and we will save that as `pizza_with_changes`.
+- Count the number of rows where *both* `exclusions` *and* `extras` are equal to the empty string '', and we will save that as `pizza_without_changes`.
+
+We also want to use `GROUP BY` to group according to `customer_id`.
+
+Lastly, we will use `ORDER BY` to sort by `customer_id`.
+
+Thus, our final SQL query for this problem is as follows:
+
+```sql
+WITH delivered_cte AS (
+    SELECT
+        co.order_id,
+        co.customer_id,
+        co.pizza_id,
+        co.exclusions,
+        co.extras,
+        co.order_time
+    FROM pizza_runner.customer_orders_cleaned AS co
+    JOIN pizza_runner.runner_orders_cleaned AS ro
+        ON co.order_id = ro.order_id
+    WHERE ro.cancellation = '' OR ro.cancellation IS NULL
+)
+SELECT
+    customer_id,
+    COUNT(
+        CASE WHEN cte.exclusions <> '' OR cte.extras <> '' THEN 1 END
+    ) AS pizzas_with_changes,
+    COUNT(
+        CASE WHEN cte.exclusions = '' AND cte.extras = '' THEN 1 END
+    ) AS pizzas_without_changes
+FROM delivered_cte AS cte
+GROUP BY cte.customer_id
+ORDER BY cte.customer_id;
+```
+
+| customer_id | pizzas_with_changes | pizzas_without_changes |
+|-------------|---------------------|------------------------|
+|         101 |                   0 |                      2 |
+|         102 |                   0 |                      3 |
+|         103 |                   3 |                      0 |
+|         104 |                   2 |                      1 |
+|         105 |                   1 |                      0 |
+
 **Answer:**
+
+- Customer 101 had **no** pizza with at least one change, and **2** pizzas without changes delivered.
+- Customer 102 had **no** pizza with at least one change, and **3** pizzas without changes delivered.
+- Customer 103 had **3** pizzas with at least one change, and **no** pizzas without changes delivered.
+- Customer 104 had **2** pizzas with at least one change, and **1** pizzas without changes delivered.
+- Customer 105 had **1** pizza with at least one change, and **no** pizzas without changes delivered.
 
 ---
 

@@ -75,7 +75,30 @@ GROUP BY co.order_id
 ORDER BY pizzas_delivered DESC;
 
 -- 7. For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
-
+WITH delivered_cte AS (
+    SELECT
+        co.order_id,
+        co.customer_id,
+        co.pizza_id,
+        co.exclusions,
+        co.extras,
+        co.order_time
+    FROM pizza_runner.customer_orders_cleaned AS co
+    JOIN pizza_runner.runner_orders_cleaned AS ro
+        ON co.order_id = ro.order_id
+    WHERE ro.cancellation = '' OR ro.cancellation IS NULL
+)
+SELECT
+    customer_id,
+    COUNT(
+        CASE WHEN cte.exclusions <> '' OR cte.extras <> '' THEN 1 END
+    ) AS pizzas_with_changes,
+    COUNT(
+        CASE WHEN cte.exclusions = '' AND cte.extras = '' THEN 1 END
+    ) AS pizzas_without_changes
+FROM delivered_cte AS cte
+GROUP BY cte.customer_id
+ORDER BY cte.customer_id;
 
 -- 8. How many pizzas were delivered that had both exclusions and extras?
 
