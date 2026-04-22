@@ -210,6 +210,47 @@ ORDER BY co.customer_id;
 
 ## 6. What was the maximum number of pizzas delivered in a single order?
 
+Here, we want to know what the maximum number of pizzas was delivered in a single order.
+
+Recall that in the table `customer_orders_cleaned`, each `order_id` corresponds to a single order. So we know that we will need to do `GROUP BY` eventually.
+
+We also need only the orders that were delivered successfully. To get that data, we need to perform `JOIN` to join `customer_orders_cleaned` with `runner_orders_cleaned` on `order_id`.
+
+Next, we use `WHERE` to filter only the rows where the delivery was successful, i.e. `cancellation = '' OR cancellation IS NULL`.
+
+Then, as mentioned previously, we will use `GROUP BY` to group these rows by `order_id`.
+
+Lastly, we will use `ORDER BY` to sort the values in *descending* (`DESC`) order so that the maximum value is at the top of the output table.
+
+Thus, our final SQL query is as follows:
+
+```sql
+SELECT
+    co.order_id,
+    COUNT(*) AS pizzas_delivered
+FROM pizza_runner.customer_orders_cleaned AS co
+JOIN pizza_runner.runner_orders_cleaned AS ro
+    ON co.order_id = ro.order_id
+WHERE ro.cancellation = '' OR ro.cancellation IS NULL
+GROUP BY co.order_id
+ORDER BY pizzas_delivered DESC;
+```
+
+| order_id | pizzas_delivered |
+|----------|------------------|
+|        4 |                3 |
+|        3 |                2 |
+|       10 |                2 |
+|        5 |                1 |
+|        2 |                1 |
+|        8 |                1 |
+|        7 |                1 |
+|        1 |                1 |
+
+**Answer:**
+
+The maximum number of pizzas delivered in a single order is 3 (which corresponds to `order_id` 4).
+
 ---
 
 ## 7. For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
