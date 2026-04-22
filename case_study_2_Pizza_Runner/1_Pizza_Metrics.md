@@ -255,14 +255,46 @@ The maximum number of pizzas delivered in a single order is 3 (which corresponds
 
 ## 7. For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
 
+```sql
+```
+
+**Answer:**
+
 ---
 
 ## 8. How many pizzas were delivered that had both exclusions and extras?
+
+```sql
+```
+
+**Answer:**
 
 ---
 
 ## 9. What was the total volume of pizzas ordered for each hour of the day?
 
+```sql
+```
+
+**Answer:**
+
 ---
 
 ## 10. What was the volume of orders for each day of the week?
+
+```sql
+```
+
+**Answer:**
+
+---
+
+End of Case Study 2 Pizza Metrics questions.
+Click [this link](https://github.com/jo2eph/8-week-SQL-challenge/blob/main/case_study_2_Pizza_Runner/2_Runner_and_Customer_Experience.md)
+for the next set of questions, Runner and Customer Experience.
+
+---
+
+[Return to Top](#pizza-runner-part-1-pizza-metrics)
+
+Prev | [Next](https://github.com/jo2eph/8-week-SQL-challenge/blob/main/case_study_2_Pizza_Runner/2_Runner_and_Customer_Experience.md)
