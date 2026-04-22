@@ -162,6 +162,50 @@ ORDER BY co.pizza_id;
 
 ## 5. How many Vegetarian and Meatlovers were ordered by each customer?
 
+Here, we want to know how many of both types of pizzas each customer ordered.
+
+So, first thing we will do is perform `JOIN` to join `customer_orders_cleaned` with `pizza_names` on `pizza_id` to get the name of the pizzas (`pizza_name`).
+
+And since we want to know how many *each* customer ordered, we know that we are going to perform `GROUP BY` to group the orders by `customer_id`.
+
+To get the actual count of both pizzas for each customers, we will use the aggregate function `COUNT`. This time, we will use a conditional count.
+We will count the total number of rows for each customer where `pizza_name = 'Vegetarian'`, and we will save that as `vegetarian_count`.
+Similarly, we will also count the total number of rows for each customer where `pizza_name = 'Meatlovers'`, and we will save that as `meatlovers_count`.
+
+Thus, our final SQL query:
+
+```sql
+SELECT
+    co.customer_id,
+    COUNT(
+        CASE WHEN pizza.pizza_name = 'Vegetarian' THEN 1 END
+    ) AS vegetarian_count,
+    COUNT (
+        CASE WHEN pizza.pizza_name = 'Meatlovers' THEN 1 END
+    ) AS meatlovers_count
+FROM pizza_runner.customer_orders_cleaned AS co
+JOIN pizza_runner.pizza_names AS pizza
+    ON co.pizza_id = pizza.pizza_id
+GROUP BY co.customer_id
+ORDER BY co.customer_id;
+```
+
+| customer_id | vegetarian_count | meatlovers_count |
+|-------------|------------------|------------------|
+|         101 |                1 |                2 |
+|         102 |                1 |                2 |
+|         103 |                1 |                3 |
+|         104 |                0 |                3 |
+|         105 |                1 |                0 |
+
+**Answers:**
+
+- Customer 101 ordered 1 Vegetarian and 2 Meatlovers pizzas.
+- Customer 102 ordered 1 Vegetarian and 2 Meatlovers pizzas.
+- Customer 103 ordered 1 Vegetarian and 3 Meatlovers pizzas.
+- Customer 104 ordered 0 Vegetarian and 3 Meatlovers pizzas.
+- Customer 105 ordered 1 Vegetarian and 0 Meatlovers pizzas.
+
 ---
 
 ## 6. What was the maximum number of pizzas delivered in a single order?

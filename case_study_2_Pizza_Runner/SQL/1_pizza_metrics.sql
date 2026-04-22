@@ -49,7 +49,19 @@ GROUP BY co.pizza_id, pizza.pizza_name
 ORDER BY co.pizza_id;
 
 -- 5. How many Vegetarian and Meatlovers were ordered by each customer?
-
+SELECT
+    co.customer_id,
+    COUNT(
+        CASE WHEN pizza.pizza_name = 'Vegetarian' THEN 1 END
+    ) AS vegetarian_count,
+    COUNT (
+        CASE WHEN pizza.pizza_name = 'Meatlovers' THEN 1 END
+    ) AS meatlovers_count
+FROM pizza_runner.customer_orders_cleaned AS co
+JOIN pizza_runner.pizza_names AS pizza
+    ON co.pizza_id = pizza.pizza_id
+GROUP BY co.customer_id
+ORDER BY co.customer_id;
 
 -- 6. What was the maximum number of pizzas delivered in a single order?
 
