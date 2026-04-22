@@ -266,8 +266,7 @@ WITH delivered_cte AS (
         co.customer_id,
         co.pizza_id,
         co.exclusions,
-        co.extras,
-        co.order_time
+        co.extras
     FROM pizza_runner.customer_orders_cleaned AS co
     JOIN pizza_runner.runner_orders_cleaned AS ro
         ON co.order_id = ro.order_id
@@ -278,20 +277,20 @@ WITH delivered_cte AS (
 
 This CTE gives us the following table:
 
-| order_id | customer_id | pizza_id | exclusions | extras |     order_time      |
-|----------|-------------|----------|------------|--------|---------------------|
-|        1 |         101 |        1 |            |        | 2020-01-01 18:05:02 |
-|        2 |         101 |        1 |            |        | 2020-01-01 19:00:52 |
-|        3 |         102 |        1 |            |        | 2020-01-02 23:51:23 |
-|        3 |         102 |        2 |            |        | 2020-01-02 23:51:23 |
-|        4 |         103 |        1 | 4          |        | 2020-01-04 13:23:46 |
-|        4 |         103 |        1 | 4          |        | 2020-01-04 13:23:46 |
-|        4 |         103 |        2 | 4          |        | 2020-01-04 13:23:46 |
-|        5 |         104 |        1 |            | 1      | 2020-01-08 21:00:29 |
-|        7 |         105 |        2 |            | 1      | 2020-01-08 21:20:29 |
-|        8 |         102 |        1 |            |        | 2020-01-09 23:54:33 |
-|       10 |         104 |        1 |            |        | 2020-01-11 18:34:49 |
-|       10 |         104 |        1 | 2, 6       | 1, 4   | 2020-01-11 18:34:49 |
+| order_id | customer_id | pizza_id | exclusions | extras |
+|----------|-------------|----------|------------|--------|
+|        1 |         101 |        1 |            |        |
+|        2 |         101 |        1 |            |        |
+|        3 |         102 |        1 |            |        |
+|        3 |         102 |        2 |            |        |
+|        4 |         103 |        1 | 4          |        |
+|        4 |         103 |        1 | 4          |        |
+|        4 |         103 |        2 | 4          |        |
+|        5 |         104 |        1 |            | 1      |
+|        7 |         105 |        2 |            | 1      |
+|        8 |         102 |        1 |            |        |
+|       10 |         104 |        1 |            |        |
+|       10 |         104 |        1 | 2, 6       | 1, 4   |
 
 Now, we want to get the count of delivered pizzas with at least one change, and the count of delivered pizzas with no change.
 
@@ -315,8 +314,7 @@ WITH delivered_cte AS (
         co.customer_id,
         co.pizza_id,
         co.exclusions,
-        co.extras,
-        co.order_time
+        co.extras
     FROM pizza_runner.customer_orders_cleaned AS co
     JOIN pizza_runner.runner_orders_cleaned AS ro
         ON co.order_id = ro.order_id
@@ -355,10 +353,43 @@ ORDER BY cte.customer_id;
 
 ## 8. How many pizzas were delivered that had both exclusions and extras?
 
+In this question, we want to know how many pizzas were delivered that had both exclusions and extras.
+
+Similar to Problem 7, we are going to create a CTE called `delivered_cte` that contains only the orders that were delivered successfully.
+
+Next, we want to find how many delivered pizzas had both extras and exclusions.
+
+For this, we will simply use `COUNT` and `CASE` to count the total number of rows in our CTE where *both* `exclusions` and `extras` are not equal to the empty string.
+We will save that as `pizzas_with_exclusions_and_extras`.
+
+Thus, our final SQL query for this problem is as follows:
+
 ```sql
+WITH delivered_cte AS (
+    SELECT
+        co.order_id,
+        co.pizza_id,
+        co.exclusions,
+        co.extras
+    FROM pizza_runner.customer_orders_cleaned AS co
+    JOIN pizza_runner.runner_orders_cleaned AS ro
+        ON co.order_id = ro.order_id
+    WHERE ro.cancellation = '' OR ro.cancellation IS NULL
+)
+SELECT
+    COUNT(
+        CASE WHEN cte.exclusions <> '' AND cte.extras <> '' THEN 1 END
+    ) AS pizzas_with_exclusions_and_extras
+FROM delivered_cte AS cte;
 ```
 
+| pizzas_with_exclusions_and_extras |
+|-----------------------------------|
+|                                 1 |
+
 **Answer:**
+
+Only 1 pizza delivered had both exclusions and extras.
 
 ---
 

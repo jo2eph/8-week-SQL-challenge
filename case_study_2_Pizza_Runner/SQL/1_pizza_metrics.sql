@@ -81,8 +81,7 @@ WITH delivered_cte AS (
         co.customer_id,
         co.pizza_id,
         co.exclusions,
-        co.extras,
-        co.order_time
+        co.extras
     FROM pizza_runner.customer_orders_cleaned AS co
     JOIN pizza_runner.runner_orders_cleaned AS ro
         ON co.order_id = ro.order_id
@@ -101,7 +100,22 @@ GROUP BY cte.customer_id
 ORDER BY cte.customer_id;
 
 -- 8. How many pizzas were delivered that had both exclusions and extras?
-
+WITH delivered_cte AS (
+    SELECT
+        co.order_id,
+        co.pizza_id,
+        co.exclusions,
+        co.extras
+    FROM pizza_runner.customer_orders_cleaned AS co
+    JOIN pizza_runner.runner_orders_cleaned AS ro
+        ON co.order_id = ro.order_id
+    WHERE ro.cancellation = '' OR ro.cancellation IS NULL
+)
+SELECT
+    COUNT(
+        CASE WHEN cte.exclusions <> '' AND cte.extras <> '' THEN 1 END
+    ) AS pizzas_with_exclusions_and_extras
+FROM delivered_cte AS cte;
 
 -- 9. What was the total volume of pizzas ordered for each hour of the day?
 
