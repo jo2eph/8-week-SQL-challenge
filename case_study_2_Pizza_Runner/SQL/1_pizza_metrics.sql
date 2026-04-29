@@ -126,3 +126,9 @@ GROUP BY order_hour
 ORDER BY order_hour;
 
 -- 10. What was the volume of orders for each day of the week?
+SELECT
+    EXTRACT(DOW FROM co.order_time) AS order_day_of_week,
+    COUNT(*) AS total_orders
+FROM pizza_runner.customer_orders_cleaned AS co
+GROUP BY order_day_of_week
+ORDER BY order_day_of_week;
