@@ -438,10 +438,37 @@ ORDER BY order_hour;
 
 ## 10. What was the volume of orders for each day of the week?
 
+To get the day of the week in PostgreSQL, we are going to use `EXTRACT` to extract `DOW` (day of the week) from `order_time`, and we will save it as `order_day_of_week`.
+
+Note that in PostgreSQL, this gives an integer from 0 to 6, where 0 represents Sunday and 6 represents Saturday.
+
+And since we want to know the total volume of orders for each day of the week, we are going to use the aggregate function `COUNT` to count how many individual orders are made for each day of the week, and we will save it as `total_orders`.
+
+Lastly, we need to use `GROUP BY` to group our data by `order_day_of_week`.
+Then, we can use `ORDER BY` to sort the values by `order_day_of_week`.
+
 ```sql
+SELECT
+    EXTRACT(DOW FROM co.order_time) AS order_day_of_week,
+    COUNT(*) AS total_orders
+FROM pizza_runner.customer_orders_cleaned AS co
+GROUP BY order_day_of_week
+ORDER BY order_day_of_week;
 ```
 
+| order_day_of_week | total_orders |
+|-------------------|--------------|
+|                 3 |            5 |
+|                 4 |            3 |
+|                 5 |            1 |
+|                 6 |            5 |
+
 **Answer:**
+
+- Wednesday (3): A total of 5 pizzas were ordered.
+- Thursday (4): A total of 3 pizzas were ordered.
+- Friday (5): A total of 1 pizza was ordered.
+- Saturday (6): A total of 5 pizzas were ordered.
 
 ---
 
