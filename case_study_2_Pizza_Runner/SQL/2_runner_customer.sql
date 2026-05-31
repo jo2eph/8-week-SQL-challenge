@@ -15,7 +15,11 @@ Questions:
 */
 
 -- 1. How many runners signed up for each 1 week period? (i.e. week starts 2021-01-01)
-
+SELECT
+    EXTRACT(WEEK FROM r.registration_date) AS week_number,
+    COUNT(DISTINCT r.runner_id) AS total_runners
+FROM pizza_runner.runners AS r
+GROUP BY week_number;
 
 -- 2. What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?
 
